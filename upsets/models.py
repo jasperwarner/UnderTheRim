@@ -5,6 +5,10 @@ from dataclasses import dataclass, field
 from typing import Any, Optional
 
 
+class ParseError(Exception):
+    """Data from a source (or a saved file) was not in the shape we expect."""
+
+
 @dataclass
 class Team:
     seo: str
@@ -68,14 +72,19 @@ class Poll:
 
     @classmethod
     def from_json(cls, d: dict[str, Any]) -> "Poll":
-        return cls(
-            gender=d["gender"],
-            title=d["title"],
-            as_of=datetime.date.fromisoformat(d["as_of"]),
-            entries=[PollEntry(int(e["rank"]), e["name"]) for e in d["entries"]],
-            source=d["source"],
-            label=d["label"],
-        )
+        try:
+            fields = {k: d[k] for k in ("gender", "title", "source", "label")}
+            if not all(isinstance(v, str) for v in fields.values()):
+                raise ValueError("text fields must be strings")
+            entries = []
+            for e in d["entries"]:
+                if not isinstance(e["name"], str) or isinstance(e["rank"], bool):
+                    raise ValueError("bad poll entry")
+                entries.append(PollEntry(int(e["rank"]), e["name"]))
+            return cls(as_of=datetime.date.fromisoformat(d["as_of"]), entries=entries,
+                       **fields)
+        except Exception as e:
+            raise ParseError(f"unexpected saved poll shape: {type(e).__name__}: {e}")
 
 
 @dataclass

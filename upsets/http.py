@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import http.client
 import json
 import time
 import urllib.error
@@ -24,15 +25,16 @@ def _throttle() -> None:
     _last_request = time.monotonic()
 
 
-def get_text(url: str, timeout: float = 20, retries: int = 2) -> str:
+def get_text(url: str, timeout: float = 20, retries: int = 2, opener=None) -> str:
+    open_url = opener or urllib.request.urlopen
     last: Exception | None = None
     for attempt in range(retries + 1):
         _throttle()
         try:
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
+            with open_url(req, timeout=timeout) as resp:
                 return resp.read().decode("utf-8", errors="replace")
-        except (urllib.error.URLError, OSError) as e:
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
             last = e
             if attempt < retries:
                 time.sleep(1.0 * (attempt + 1))

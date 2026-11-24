@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import unittest
 from datetime import date
@@ -82,6 +83,113 @@ class SourcesTest(unittest.TestCase):
         self.assertTrue(lines)
         self.assertTrue({l.team_seo for l in lines} <= {"neb-kearney", "regis-co"})
         self.assertEqual(max(l.points for l in lines), 19)
+
+
+    def test_empty_day_response_is_zero_games(self):
+        # Exact body the live API returned for men's D2 on 2026-08-01 (HTTP 200).
+        body = {"inputMD5Sum": "d751713988987e9331980363e24189ce",
+                "instanceId": "d41d8cd98f00b204e9800998ecf8427e",
+                "updated_at": "2026-11-24 02:32:30", "games": []}
+        self.assertEqual(parse_scoreboard(body, "men"), [])
+
+
+def nabc_with(ranks):
+    d = jload("nabc_2026-11-15.json")
+    d["data"] = [dict(d["data"][0], RANK=r, **{"SCHOOL (1ST VOTES)": f"Team {i}"})
+                 for i, r in enumerate(ranks)]
+    return d
+
+
+def wbca_with(ranks, header=True):
+    head = "<tr><td>Rank</td><td>School (record)</td></tr>" if header else ""
+    rows = "".join(f"<tr><td>{r}</td><td>Team{i} (1-0)</td></tr>" for i, r in enumerate(ranks))
+    return f"<p>11/17/2026</p><table>{head}{rows}</table>"
+
+
+TOP25 = [str(i) for i in range(1, 26)]
+
+
+class PollTiesAndSanityTest(unittest.TestCase):
+    def test_nabc_ties(self):
+        ranks = TOP25[:22] + ["T-23", "T23", "23T"]
+        p = parse_nabc(nabc_with(ranks))
+        self.assertEqual([e.rank for e in p.entries][-3:], [23, 23, 23])
+
+    def test_wbca_ties(self):
+        ranks = TOP25[:22] + ["T-23", "T23", "23T"]
+        p = parse_wbca(wbca_with(ranks))
+        self.assertEqual([e.rank for e in p.entries][-3:], [23, 23, 23])
+        self.assertEqual(len(p.entries), 25)
+
+    def test_wbca_unreadable_rank_is_error_not_skipped(self):
+        with self.assertRaises(ParseError):
+            parse_wbca(wbca_with(TOP25[:24] + ["25?x"]))
+
+    def test_wbca_header_rows_skipped(self):
+        html_text = wbca_with(TOP25).replace(
+            "</table>", "<tr><td>Others receiving votes</td><td>-</td></tr></table>")
+        self.assertEqual(len(parse_wbca(html_text).entries), 25)
+
+    def test_too_few_entries_raise(self):
+        with self.assertRaises(ParseError):
+            parse_nabc(nabc_with(TOP25[:24]))
+        with self.assertRaises(ParseError):
+            parse_wbca(wbca_with(TOP25[:24]))
+
+    def test_must_start_at_1(self):
+        shifted = [str(i) for i in range(2, 27)]
+        with self.assertRaises(ParseError):
+            parse_nabc(nabc_with(shifted))
+        with self.assertRaises(ParseError):
+            parse_wbca(wbca_with(shifted))
+
+
+class ParserRobustnessTest(unittest.TestCase):
+    def assertParseError(self, fn, *args):
+        with self.assertRaises(ParseError):
+            fn(*args)
+
+    def test_scoreboard_bad_shapes(self):
+        good = jload("scoreboard_men_2026-11-21.json")
+        bad_team = copy.deepcopy(good)
+        bad_team["games"][0]["game"]["home"]["conferences"] = ["x"]
+        bad_name = copy.deepcopy(good)
+        bad_name["games"][0]["game"]["home"]["names"]["short"] = 5
+        for data in ([], {"games": None}, {"games": [1]}, {"games": [{"game": []}]},
+                     bad_team, bad_name, "text"):
+            self.assertParseError(parse_scoreboard, data, "men")
+
+    def test_nabc_bad_shapes(self):
+        good = jload("nabc_2026-11-15.json")
+        bad_date = dict(good, updated="Through Games NOV. 45, 2026")
+        bad_rank = copy.deepcopy(good)
+        bad_rank["data"][0]["RANK"] = "one"
+        bad_school = copy.deepcopy(good)
+        bad_school["data"][0]["SCHOOL (1ST VOTES)"] = None
+        for data in ([], {"updated": 5}, dict(good, data=None), bad_date, bad_rank,
+                     bad_school, "text"):
+            self.assertParseError(parse_nabc, data)
+
+    def test_wbca_bad_inputs(self):
+        good = (FIX / "wbca_2026-11-17.html").read_text(encoding="utf-8")
+        self.assertParseError(parse_wbca, None)
+        self.assertParseError(parse_wbca, good.replace("11/17/2026", "13/45/2026"))
+
+    def test_boxscore_bad_shapes(self):
+        good = jload("boxscore_6677046.json")
+        bad_player = copy.deepcopy(good)
+        bad_player["teamBoxscore"][0]["playerStats"] = ["x"]
+        bad_team = copy.deepcopy(good)
+        bad_team["teamBoxscore"][0]["teamId"] = "nope"
+        for data in ([], {"teams": None}, bad_player, bad_team, "text"):
+            self.assertParseError(parse_boxscore, data)
+
+    def test_full_boxscore_fixture_sums_to_score(self):
+        lines = parse_boxscore(jload("boxscore_6665635.json"))
+        totals = {}
+        for l in lines:
+            totals[l.team_seo] = totals.get(l.team_seo, 0) + l.points
+        self.assertEqual(totals, {"minn-st-mankato": 79, "northern-mich": 77})
 
 
 if __name__ == "__main__":

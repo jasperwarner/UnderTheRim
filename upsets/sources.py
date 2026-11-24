@@ -7,7 +7,7 @@ from datetime import date
 from typing import Any, Optional
 
 from .http import get_json, get_text
-from .models import Game, PlayerLine, Poll, PollEntry, Team
+from .models import Game, ParseError, PlayerLine, Poll, PollEntry, Team
 
 API_BASE = "https://ncaa-api.henrygd.me"
 WBCA_URL = "https://wbca.org/polls-ncaa-division-ii-coaches/"
@@ -16,8 +16,25 @@ _MONTHS = {m: i for i, m in enumerate(
     ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
 
 
-class ParseError(Exception):
-    pass
+MIN_POLL_ENTRIES = 25
+
+_RANK_RE = re.compile(r"^T?-?\s*(\d{1,3})\s*T?$", re.I)
+
+
+def _rank(cell: Any) -> Optional[int]:
+    """'7' -> 7; ties like 'T-24', 'T24', '24T' -> 24; anything else -> None."""
+    m = _RANK_RE.match(str(cell).strip())
+    return int(m.group(1)) if m else None
+
+
+def _check_poll(entries: list[PollEntry], what: str) -> None:
+    if any(not e.name for e in entries):
+        raise ParseError(f"{what} has a blank school name")
+    if len(entries) < MIN_POLL_ENTRIES:
+        raise ParseError(f"{what} has {len(entries)} teams (expected at least "
+                         f"{MIN_POLL_ENTRIES}); layout may have changed")
+    if entries[0].rank != 1 or min(e.rank for e in entries) != 1:
+        raise ParseError(f"{what} ranks don't start at 1; layout may have changed")
 
 
 def _int_or_none(v: Any) -> Optional[int]:
@@ -40,22 +57,33 @@ def _team(t: dict) -> Team:
     )
 
 
+def _str(v: Any) -> str:
+    if v is None:
+        return ""
+    if not isinstance(v, str):
+        raise TypeError(f"expected text, got {type(v).__name__}")
+    return v
+
+
 def parse_scoreboard(data: dict, gender: str) -> list[Game]:
     games = []
     try:
         for item in data["games"]:
             g = item["game"]
-            games.append(Game(
+            game = Game(
                 game_id=str(g["gameID"]),
                 gender=gender,
                 home=_team(g["home"]),
                 away=_team(g["away"]),
-                state=g.get("gameState", ""),
-                period=g.get("currentPeriod", ""),
-                url=g.get("url", ""),
-            ))
-    except (KeyError, TypeError) as e:
-        raise ParseError(f"unexpected scoreboard shape: {e!r}")
+                state=_str(g.get("gameState", "")),
+                period=_str(g.get("currentPeriod", "")),
+                url=_str(g.get("url", "")),
+            )
+            for t in (game.home, game.away):
+                t.seo, t.name, t.conference = _str(t.seo), _str(t.name), _str(t.conference)
+            games.append(game)
+    except Exception as e:
+        raise ParseError(f"unexpected scoreboard shape: {type(e).__name__}: {e}")
     return games
 
 
@@ -69,21 +97,34 @@ def parse_nabc(data: dict) -> Poll:
         if not m or m.group(1).upper() not in _MONTHS:
             raise ParseError(f"cannot read NABC date from {data['updated']!r}")
         as_of = date(int(m.group(3)), _MONTHS[m.group(1).upper()], int(m.group(2)))
-        entries = [
-            PollEntry(int(r["RANK"]), re.sub(r"\s*\(\d+\)\s*$", "", r["SCHOOL (1ST VOTES)"]).strip())
-            for r in data["data"]
-        ]
-        title = data.get("title", "NABC Coaches")
-    except (KeyError, TypeError, ValueError) as e:
-        raise ParseError(f"unexpected NABC shape: {e!r}")
-    if not entries:
-        raise ParseError("NABC poll has no entries")
+        entries = []
+        for r in data["data"]:
+            rank = _rank(r["RANK"])
+            if rank is None:
+                raise ParseError(f"unreadable NABC rank {r['RANK']!r}")
+            school = re.sub(r"\s*\(\d+\)\s*$", "", _str(r["SCHOOL (1ST VOTES)"])).strip()
+            entries.append(PollEntry(rank, school))
+        title = _str(data.get("title", "NABC Coaches")) or "NABC Coaches"
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(f"unexpected NABC shape: {type(e).__name__}: {e}")
+    _check_poll(entries, "NABC poll")
     return Poll("men", title, as_of, entries,
                 f"{API_BASE}/rankings/basketball-men/d2/nabc-coaches",
                 f"NABC thru {_fmt(as_of)}")
 
 
 def parse_wbca(html_text: str) -> Poll:
+    try:
+        return _parse_wbca(html_text)
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(f"unexpected WBCA page: {type(e).__name__}: {e}")
+
+
+def _parse_wbca(html_text: str) -> Poll:
     table = re.search(r"<table.*?</table>", html_text, re.S | re.I)
     if not table:
         raise ParseError("WBCA page has no table")
@@ -92,12 +133,14 @@ def parse_wbca(html_text: str) -> Poll:
     for row in rows:
         cells = [html.unescape(re.sub(r"<[^>]+>", "", c)).replace("\xa0", " ").strip()
                  for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S | re.I)]
-        if len(cells) < 2 or not cells[0].isdigit():
-            continue  # header row
+        if len(cells) < 2 or not re.search(r"\d", cells[0]):
+            continue  # header row ("Rank", "School (record)", ...)
+        rank = _rank(cells[0])
+        if rank is None:
+            raise ParseError(f"unreadable WBCA rank {cells[0]!r}")
         name = re.sub(r"\s*\(\d+-\d+\)\s*$", "", cells[1]).strip()
-        entries.append(PollEntry(int(cells[0]), name))
-    if len(entries) < 20:
-        raise ParseError(f"WBCA table has {len(entries)} rows; layout may have changed")
+        entries.append(PollEntry(rank, name))
+    _check_poll(entries, "WBCA poll")
     m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", html_text)
     if not m:
         raise ParseError("WBCA release date not found")
@@ -108,18 +151,18 @@ def parse_wbca(html_text: str) -> Poll:
 
 def parse_boxscore(data: dict) -> list[PlayerLine]:
     try:
-        seo = {str(t["teamId"]): t["seoname"] for t in data["teams"]}
+        seo = {str(t["teamId"]): _str(t["seoname"]) for t in data["teams"]}
         out = []
         for tb in data["teamBoxscore"]:
             team_seo = seo[str(tb["teamId"])]
-            for p in tb.get("playerStats", []):
+            for p in tb.get("playerStats") or []:
                 pts = _int_or_none(p.get("points"))
                 if pts is None:
                     continue
-                name = f"{p.get('firstName', '')} {p.get('lastName', '')}".strip()
+                name = f"{p.get('firstName') or ''} {p.get('lastName') or ''}".strip()
                 out.append(PlayerLine(name, team_seo, pts))
-    except (KeyError, TypeError) as e:
-        raise ParseError(f"unexpected boxscore shape: {e!r}")
+    except Exception as e:
+        raise ParseError(f"unexpected boxscore shape: {type(e).__name__}: {e}")
     return out
 
 
