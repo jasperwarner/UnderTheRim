@@ -54,7 +54,8 @@ class PollsStoreTest(unittest.TestCase):
             for i, bad in enumerate([dict(good, as_of="not a date"),
                                      dict(good, entries=[{"rank": "x", "name": "A"}]),
                                      dict(good, entries=[{"rank": 1, "name": 7}]),
-                                     dict(good, title=None), [1, 2]]):
+                                     dict(good, title=None), dict(good, entries=[]),
+                                     [1, 2]]):
                 (d / "2026-11-22.json").write_text(json.dumps(bad))
                 warnings = []
                 self.assertIsNone(poll_for("men", date(2026, 11, 23), root, warnings), i)

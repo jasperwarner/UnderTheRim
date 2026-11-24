@@ -81,6 +81,8 @@ class Poll:
                 if not isinstance(e["name"], str) or isinstance(e["rank"], bool):
                     raise ValueError("bad poll entry")
                 entries.append(PollEntry(int(e["rank"]), e["name"]))
+            if not entries:
+                raise ValueError("no entries")
             return cls(as_of=datetime.date.fromisoformat(d["as_of"]), entries=entries,
                        **fields)
         except Exception as e:
