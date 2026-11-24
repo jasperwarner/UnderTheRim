@@ -339,17 +339,20 @@ class LoadAliasesTest(unittest.TestCase):
         al = load_aliases(ALIASES)
         self.assertEqual(al["men"]["Oklahoma Baptist"], "okla-baptist")
         self.assertEqual(al["women"]["Embry-Riddle"], "embry-riddle-fl")
-        self.assertEqual(al["not_same"]["men"], {"Nova Southeastern": ["ga-southwestern"]})
+        self.assertEqual(al["not_same"]["men"]["Nova Southeastern"], ["ga-southwestern"])
         # D2 aliases added after the real-day check (poll spells out the school's name)
         self.assertEqual(al["men"]["West Alabama"], "west-ala")
         self.assertEqual(al["men"]["Eastern New Mexico"], "eastern-nm")
         self.assertEqual(al["men"]["West Texas A&M"], "west-tex-am")
         self.assertEqual(al["women"]["West Texas A&M"], "west-tex-am")
         # D1: the AP poll's spelling -> the scoreboard's team
+        # Per-key checks only: the owner adds D1 aliases to the real file over time, so
+        # this must keep passing when entries are added.
         for gender in ("men", "women"):
-            self.assertEqual(al["d1"][gender], {"St. John's": "st-johns-ny",
-                                                "Southern Cal": "southern-california"})
-        self.assertEqual(al["d1"]["not_same"], {"men": {}, "women": {}})
+            self.assertEqual(al["d1"][gender]["St. John's"], "st-johns-ny")
+            self.assertEqual(al["d1"][gender]["Southern Cal"], "southern-california")
+        self.assertIn("men", al["d1"]["not_same"])
+        self.assertIn("women", al["d1"]["not_same"])
 
     def test_d1_section_absent_is_empty(self):
         al = self._load(json.dumps({"men": {"A": "a"}}))
