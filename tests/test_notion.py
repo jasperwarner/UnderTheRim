@@ -27,11 +27,20 @@ class FakeResponse:
         return False
 
 
+def http_error(code, message="boom"):
+    return urllib.error.HTTPError(
+        "https://api.notion.com/v1/x", code, "err", {},
+        io.BytesIO(json.dumps({"message": message}).encode()))
+
+
 class FakeOpener:
-    def __init__(self, query_results=None, page_url="https://notion.so/page", raises=None):
+    def __init__(self, query_results=None, page_url="https://notion.so/page", raises=None,
+                 fail_on=None):
         self.query_results = query_results or []
         self.page_url = page_url
         self.raises = raises
+        # fail_on: {(method, path suffix): [exception, ...]} raised in order, then succeed
+        self.fail_on = fail_on or {}
         self.calls = []
 
     def __call__(self, request, timeout=None):
@@ -40,6 +49,9 @@ class FakeOpener:
         if self.raises:
             raise self.raises
         url = request.full_url
+        for (method, suffix), errors in self.fail_on.items():
+            if request.get_method() == method and url.endswith(suffix) and errors:
+                raise errors.pop(0)
         if url.endswith("/query"):
             return FakeResponse({"results": [{"id": p} for p in self.query_results]})
         if url.endswith("/v1/pages"):
@@ -63,20 +75,61 @@ class NotionClientTests(unittest.TestCase):
         NotionClient(TOKEN, "db1", opener=op).publish(make_report())
         seq = [(m, u.split("/v1")[1]) for m, u, _, _ in op.calls]
         self.assertEqual(seq, [
+            ("POST", "/pages"),
             ("POST", "/databases/db1/query"),
             ("PATCH", "/pages/old1"),
-            ("POST", "/pages"),
         ])
-        self.assertEqual(op.calls[0][2]["filter"],
+        self.assertEqual(op.calls[1][2]["filter"],
                          {"property": "Date", "date": {"equals": "2026-11-21"}})
-        self.assertEqual(op.calls[1][2], {"archived": True})
+        self.assertEqual(op.calls[2][2], {"archived": True})
+
+    def test_new_page_is_not_archived(self):
+        op = FakeOpener(query_results=["old1", "newpage"])
+        NotionClient(TOKEN, "db1", opener=op).publish(make_report())
+        archived = [u for m, u, _, _ in op.calls if m == "PATCH"]
+        self.assertEqual(archived, ["https://api.notion.com/v1/pages/old1"])
+
+    def test_failed_create_leaves_old_page(self):
+        op = FakeOpener(query_results=["old1"],
+                        fail_on={("POST", "/v1/pages"): [http_error(400, "bad block")]})
+        with self.assertRaises(FetchError):
+            NotionClient(TOKEN, "db1", opener=op, sleep=lambda s: None).publish(make_report())
+        self.assertEqual([m for m, _, _, _ in op.calls], ["POST"])
+        self.assertFalse(any(u.endswith("/pages/old1") for _, u, _, _ in op.calls))
+
+    def test_retries_once_on_429_and_5xx(self):
+        for code in (429, 500, 503):
+            sleeps = []
+            op = FakeOpener(fail_on={("POST", "/v1/pages"): [http_error(code)]})
+            url = NotionClient(TOKEN, "db1", opener=op, sleep=sleeps.append).publish(make_report())
+            self.assertEqual(url, "https://notion.so/page")
+            self.assertEqual(sleeps, [2.0], code)
+            self.assertEqual([u.split("/v1")[1] for _, u, _, _ in op.calls][:2],
+                             ["/pages", "/pages"])
+
+    def test_gives_up_after_one_retry(self):
+        sleeps = []
+        op = FakeOpener(fail_on={("POST", "/v1/pages"): [http_error(502), http_error(502)]})
+        with self.assertRaises(FetchError) as cm:
+            NotionClient(TOKEN, "db1", opener=op, sleep=sleeps.append).publish(make_report())
+        self.assertIn("502", str(cm.exception))
+        self.assertNotIn(TOKEN, str(cm.exception))
+        self.assertEqual(len(sleeps), 1)
+        self.assertEqual(len(op.calls), 2)
+
+    def test_no_retry_on_400(self):
+        sleeps = []
+        op = FakeOpener(fail_on={("POST", "/v1/pages"): [http_error(400)]})
+        with self.assertRaises(FetchError):
+            NotionClient(TOKEN, "db1", opener=op, sleep=sleeps.append).publish(make_report())
+        self.assertEqual((sleeps, len(op.calls)), ([], 1))
 
     def test_first_run_creates(self):
         r = make_report()
         op = FakeOpener()
         url = NotionClient(TOKEN, "db1", opener=op).publish(r)
         self.assertEqual(len(op.calls), 2)
-        body = op.calls[1][2]
+        body = op.calls[0][2]
         self.assertEqual(body["parent"], {"database_id": "db1"})
         props = body["properties"]
         self.assertEqual(props["Status"]["select"]["name"], r.status)
@@ -85,7 +138,7 @@ class NotionClientTests(unittest.TestCase):
         self.assertEqual(props["Flags"], {"number": 0})
         self.assertEqual(props["Polls used"]["rich_text"][0]["text"]["content"], "men: 11/17")
         self.assertEqual(url, "https://notion.so/page")
-        headers = {k.lower(): v for k, v in op.calls[1][3].items()}
+        headers = {k.lower(): v for k, v in op.calls[0][3].items()}
         self.assertEqual(headers["authorization"], "Bearer " + TOKEN)
         self.assertEqual(headers["notion-version"], "2022-06-28")
 
@@ -99,8 +152,8 @@ class NotionClientTests(unittest.TestCase):
             NotionClient(TOKEN, "db1", opener=op).publish(make_report())
         finally:
             notion.to_notion_blocks = orig
-        self.assertEqual(len(op.calls[1][2]["children"]), 100)
-        appends = op.calls[2:]
+        self.assertEqual(len(op.calls[0][2]["children"]), 100)
+        appends = op.calls[1:3]
         self.assertEqual([c[0] for c in appends], ["PATCH", "PATCH"])
         self.assertTrue(all(c[1].endswith("/v1/blocks/newpage/children") for c in appends))
         self.assertEqual([len(c[2]["children"]) for c in appends], [100, 50])
