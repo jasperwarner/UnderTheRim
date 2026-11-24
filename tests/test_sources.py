@@ -5,10 +5,12 @@ import json
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest import mock
 
-from upsets.models import PollEntry
-from upsets.sources import (ParseError, parse_boxscore, parse_nabc,
-                            parse_scoreboard, parse_wbca)
+from upsets.models import Poll, PollEntry
+from upsets.sources import (ParseError, _check_poll, fetch_poll, fetch_scoreboard,
+                            parse_ap, parse_boxscore, parse_nabc, parse_scoreboard,
+                            parse_wbca)
 
 FIX = Path(__file__).parent / "fixtures"
 
@@ -190,6 +192,133 @@ class ParserRobustnessTest(unittest.TestCase):
         for l in lines:
             totals[l.team_seo] = totals.get(l.team_seo, 0) + l.points
         self.assertEqual(totals, {"minn-st-mankato": 79, "northern-mich": 77})
+
+
+class ParseApTest(unittest.TestCase):
+    def test_men_poll(self):
+        p = parse_ap(jload("ap_men_2026-11-22.json"), "men")
+        self.assertEqual(len(p.entries), 25)
+        self.assertEqual(p.entries[0], PollEntry(1, "Houston", "6-0"))
+        self.assertEqual(p.gender, "men")
+        self.assertEqual(p.as_of, date(2026, 11, 22))
+        self.assertEqual(p.label, "AP thru Nov 22")
+        self.assertEqual(p.division, "d1")
+        self.assertEqual(p.entries[0].record, "6-0")
+        self.assertEqual(p.source,
+                         "https://ncaa-api.henrygd.me/rankings/basketball-men/d1/associated-press")
+
+    def test_women_poll(self):
+        p = parse_ap(jload("ap_women_2026-11-22.json"), "women")
+        self.assertEqual(len(p.entries), 25)
+        self.assertEqual(p.entries[0].name, "South Carolina")
+        self.assertEqual(p.division, "d1")
+        self.assertTrue(p.source.endswith("/rankings/basketball-women/d1/associated-press"))
+
+    def test_school_with_parenthesis_kept(self):
+        names = {e.name for e in parse_ap(jload("ap_men_2026-11-22.json"), "men").entries}
+        self.assertIn("Miami (FL)", names)
+        self.assertIn("Houston", names)
+        self.assertNotIn("Houston (55)", names)
+        d = jload("ap_men_2026-11-22.json")
+        d["data"][0]["SCHOOL"] = "Miami (FL) (12)"
+        self.assertEqual(parse_ap(d, "men").entries[0].name, "Miami (FL)")
+
+    def test_ap_bad_shape_raises_parse_error(self):
+        good = jload("ap_men_2026-11-22.json")
+        bad_date = dict(good, updated="Through Games NOV. 45, 2026")
+        bad_rank = copy.deepcopy(good)
+        bad_rank["data"][0]["RANK"] = "one"
+        bad_school = copy.deepcopy(good)
+        bad_school["data"][0]["SCHOOL"] = None
+        bad_record = copy.deepcopy(good)
+        bad_record["data"][0]["RECORD"] = 6
+        for data in ([], {"updated": 5}, dict(good, data=None), bad_date, bad_rank,
+                     bad_school, bad_record, "text"):
+            with self.assertRaises(ParseError):
+                parse_ap(data, "men")
+
+    def test_ap_too_few_entries_raises(self):
+        d = jload("ap_men_2026-11-22.json")
+        d["data"] = d["data"][:24]
+        with self.assertRaises(ParseError):
+            parse_ap(d, "men")
+        with self.assertRaises(ParseError):
+            _check_poll([PollEntry(i, f"T{i}") for i in range(1, 25)], "AP poll")
+
+
+class ParseScoreboardDivisionTest(unittest.TestCase):
+    def test_d1_division_set(self):
+        games = parse_scoreboard(jload("scoreboard_d1_men_2026-11-23.json"), "men", "d1")
+        self.assertEqual(len(games), 46)
+        self.assertTrue(all(g.division == "d1" for g in games))
+
+    def test_d2_division_is_default(self):
+        games = parse_scoreboard(jload("scoreboard_men_2026-11-21.json"), "men")
+        self.assertTrue(games)
+        self.assertTrue(all(g.division == "d2" for g in games))
+
+
+class PollJsonTest(unittest.TestCase):
+    def test_old_saved_poll_still_loads(self):
+        old = {"gender": "men", "title": "NABC Coaches", "as_of": "2026-11-15",
+               "entries": [{"rank": 1, "name": "Gannon"}],
+               "source": "x", "label": "NABC thru Nov 15"}
+        p = Poll.from_json(old)
+        self.assertEqual(p.division, "d2")
+        self.assertEqual(p.entries[0].record, "")
+        self.assertEqual(p.entries[0], PollEntry(1, "Gannon"))
+
+    def test_d2_json_has_no_record_key(self):
+        p = Poll("men", "t", date(2026, 11, 15), [PollEntry(1, "Gannon")], "x", "l")
+        out = p.to_json()
+        self.assertEqual(out["division"], "d2")
+        self.assertEqual(out["entries"], [{"rank": 1, "name": "Gannon"}])
+
+    def test_d1_round_trip_keeps_division_and_record(self):
+        p = parse_ap(jload("ap_men_2026-11-22.json"), "men")
+        again = Poll.from_json(json.loads(json.dumps(p.to_json())))
+        self.assertEqual(again, p)
+        self.assertEqual(again.division, "d1")
+        self.assertEqual(again.entries[0].record, "6-0")
+
+    def test_non_string_record_is_parse_error(self):
+        d = parse_ap(jload("ap_men_2026-11-22.json"), "men").to_json()
+        d["entries"][0]["record"] = 6
+        with self.assertRaises(ParseError):
+            Poll.from_json(d)
+        d = parse_ap(jload("ap_men_2026-11-22.json"), "men").to_json()
+        d["division"] = 1
+        with self.assertRaises(ParseError):
+            Poll.from_json(d)
+
+
+class FetchUrlTest(unittest.TestCase):
+    def test_d1_scoreboard_url(self):
+        with mock.patch("upsets.sources.get_json", return_value={"games": []}) as gj:
+            self.assertEqual(fetch_scoreboard("men", date(2026, 11, 23), "d1"), [])
+        gj.assert_called_once_with(
+            "https://ncaa-api.henrygd.me/scoreboard/basketball-men/d1/2026/11/23/all-conf")
+
+    def test_d2_scoreboard_url_unchanged(self):
+        with mock.patch("upsets.sources.get_json", return_value={"games": []}) as gj:
+            fetch_scoreboard("women", date(2026, 11, 23))
+        gj.assert_called_once_with(
+            "https://ncaa-api.henrygd.me/scoreboard/basketball-women/d2/2026/11/23/all-conf")
+
+    def test_d1_women_poll_url(self):
+        with mock.patch("upsets.sources.get_json",
+                        return_value=jload("ap_women_2026-11-22.json")) as gj:
+            p = fetch_poll("women", "d1")
+        gj.assert_called_once_with(
+            "https://ncaa-api.henrygd.me/rankings/basketball-women/d1/associated-press")
+        self.assertEqual(p.division, "d1")
+
+    def test_d2_men_poll_url_unchanged(self):
+        with mock.patch("upsets.sources.get_json",
+                        return_value=jload("nabc_2026-11-15.json")) as gj:
+            fetch_poll("men")
+        gj.assert_called_once_with(
+            "https://ncaa-api.henrygd.me/rankings/basketball-men/d2/nabc-coaches")
 
 
 if __name__ == "__main__":

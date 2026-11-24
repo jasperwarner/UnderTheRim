@@ -27,6 +27,7 @@ class Game:
     state: str
     period: str
     url: str
+    division: str = "d2"
 
     @property
     def is_final(self) -> bool:
@@ -49,6 +50,7 @@ class Game:
 class PollEntry:
     rank: int
     name: str
+    record: str = ""
 
 
 @dataclass
@@ -59,15 +61,20 @@ class Poll:
     entries: list[PollEntry]
     source: str
     label: str
+    division: str = "d2"
 
     def to_json(self) -> dict[str, Any]:
         return {
             "gender": self.gender,
             "title": self.title,
             "as_of": self.as_of.isoformat(),
-            "entries": [{"rank": e.rank, "name": e.name} for e in self.entries],
+            "entries": [
+                {"rank": e.rank, "name": e.name, **({"record": e.record} if e.record else {})}
+                for e in self.entries
+            ],
             "source": self.source,
             "label": self.label,
+            "division": self.division,
         }
 
     @classmethod
@@ -76,15 +83,20 @@ class Poll:
             fields = {k: d[k] for k in ("gender", "title", "source", "label")}
             if not all(isinstance(v, str) for v in fields.values()):
                 raise ValueError("text fields must be strings")
+            division = d.get("division", "d2")
+            if not isinstance(division, str):
+                raise ValueError("division must be a string")
             entries = []
             for e in d["entries"]:
-                if not isinstance(e["name"], str) or isinstance(e["rank"], bool):
+                record = e.get("record", "")
+                if (not isinstance(e["name"], str) or isinstance(e["rank"], bool)
+                        or not isinstance(record, str)):
                     raise ValueError("bad poll entry")
-                entries.append(PollEntry(int(e["rank"]), e["name"]))
+                entries.append(PollEntry(int(e["rank"]), e["name"], record))
             if not entries:
                 raise ValueError("no entries")
             return cls(as_of=datetime.date.fromisoformat(d["as_of"]), entries=entries,
-                       **fields)
+                       division=division, **fields)
         except Exception as e:
             raise ParseError(f"unexpected saved poll shape: {type(e).__name__}: {e}")
 

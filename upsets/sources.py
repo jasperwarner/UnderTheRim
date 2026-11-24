@@ -65,7 +65,7 @@ def _str(v: Any) -> str:
     return v
 
 
-def parse_scoreboard(data: dict, gender: str) -> list[Game]:
+def parse_scoreboard(data: dict, gender: str, division: str = "d2") -> list[Game]:
     games = []
     try:
         for item in data["games"]:
@@ -78,6 +78,7 @@ def parse_scoreboard(data: dict, gender: str) -> list[Game]:
                 state=_str(g.get("gameState", "")),
                 period=_str(g.get("currentPeriod", "")),
                 url=_str(g.get("url", "")),
+                division=division,
             )
             for t in (game.home, game.away):
                 t.seo, t.name, t.conference = _str(t.seo), _str(t.name), _str(t.conference)
@@ -113,6 +114,34 @@ def parse_nabc(data: dict) -> Poll:
     return Poll("men", title, as_of, entries,
                 f"{API_BASE}/rankings/basketball-men/d2/nabc-coaches",
                 f"NABC thru {_fmt(as_of)}")
+
+
+def parse_ap(data: dict, gender: str) -> Poll:
+    try:
+        m = re.search(r"([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{1,2}),\s*(\d{4})", data["updated"])
+        if not m or m.group(1).upper() not in _MONTHS:
+            raise ParseError(f"cannot read AP date from {data['updated']!r}")
+        as_of = date(int(m.group(3)), _MONTHS[m.group(1).upper()], int(m.group(2)))
+        entries = []
+        for r in data["data"]:
+            rank = _rank(r["RANK"])
+            if rank is None:
+                raise ParseError(f"unreadable AP rank {r['RANK']!r}")
+            # Strip only a trailing vote count like " (55)"; "Miami (FL)" stays whole.
+            school = re.sub(r"\s*\(\d+\)\s*$", "", _str(r["SCHOOL"])).strip()
+            entries.append(PollEntry(rank, school, _str(r.get("RECORD", "")).strip()))
+        title = _str(data.get("title", "AP Top 25")) or "AP Top 25"
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(f"unexpected AP shape: {type(e).__name__}: {e}")
+    _check_poll(entries, "AP poll")
+    return Poll(gender, title, as_of, entries, _ap_url(gender), f"AP thru {_fmt(as_of)}",
+                "d1")
+
+
+def _ap_url(gender: str) -> str:
+    return f"{API_BASE}/rankings/basketball-{gender}/d1/associated-press"
 
 
 def parse_wbca(html_text: str) -> Poll:
@@ -166,12 +195,14 @@ def parse_boxscore(data: dict) -> list[PlayerLine]:
     return out
 
 
-def fetch_scoreboard(gender: str, day: date) -> list[Game]:
-    url = f"{API_BASE}/scoreboard/basketball-{gender}/d2/{day:%Y/%m/%d}/all-conf"
-    return parse_scoreboard(get_json(url), gender)
+def fetch_scoreboard(gender: str, day: date, division: str = "d2") -> list[Game]:
+    url = f"{API_BASE}/scoreboard/basketball-{gender}/{division}/{day:%Y/%m/%d}/all-conf"
+    return parse_scoreboard(get_json(url), gender, division)
 
 
-def fetch_poll(gender: str) -> Poll:
+def fetch_poll(gender: str, division: str = "d2") -> Poll:
+    if division == "d1":
+        return parse_ap(get_json(_ap_url(gender)), gender)
     if gender == "men":
         return parse_nabc(get_json(f"{API_BASE}/rankings/basketball-men/d2/nabc-coaches"))
     return parse_wbca(get_text(WBCA_URL))
