@@ -47,7 +47,8 @@ def load_aliases(path: Path) -> dict:
     """Read aliases.json.
 
     Shape: {"men": {poll name: seo}, "women": {poll name: seo},
-            "not_same": {"men": {poll name: [seo, ...]}, "women": {...}}}.
+            "not_same": {"men": {poll name: [seo, ...]}, "women": {...}},
+            "d1": {same three keys, for Division I; all empty when absent}}.
     Raises ValueError (or OSError) if the file is missing or the shape is wrong.
     """
     data = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -59,7 +60,35 @@ def load_aliases(path: Path) -> dict:
         raise ValueError("not_same must be an object")
     out["not_same"] = {g: _list_map(not_same.get(g, {}), f"not_same.{g}")
                        for g in GENDER_KEYS}
+    out["d1"] = _load_division(data.get("d1", {}), "d1")
     return out
+
+
+def _load_division(data, where: str) -> dict:
+    """One division's aliases: {"men", "women", "not_same": {"men", "women"}}."""
+    if not isinstance(data, dict):
+        raise ValueError(f"{where} must be an object")
+    out: dict = {g: _str_map(data.get(g, {}), f"{where}.{g}") for g in GENDER_KEYS}
+    not_same = data.get("not_same", {})
+    if not isinstance(not_same, dict):
+        raise ValueError(f"{where}.not_same must be an object")
+    out["not_same"] = {g: _list_map(not_same.get(g, {}), f"{where}.not_same.{g}")
+                       for g in GENDER_KEYS}
+    return out
+
+
+def aliases_for(aliases: dict, division: str) -> dict:
+    """The {"men", "women", "not_same"} aliases for one division.
+
+    D2's live at the top level of aliases.json (unchanged); D1's under "d1". A
+    missing "d1" gives empty aliases rather than an error.
+    """
+    if division == "d2":
+        return aliases
+    section = aliases.get(division)
+    if section is None:
+        return _load_division({}, division)
+    return section
 
 
 def _known_index(known: Optional[dict[str, str]]) -> dict[str, str]:
@@ -84,6 +113,7 @@ def build_rank_map(
     poll: Poll, games: list[Game], aliases: dict[str, str],
     not_same: Optional[dict[str, list[str]]] = None,
     known: Optional[dict[str, str]] = None,
+    records: Optional[dict[str, str]] = None,
 ) -> tuple[dict[str, int], list[str]]:
     """Match poll names to today's scoreboard teams.
 
@@ -91,6 +121,9 @@ def build_rank_map(
     A poll name that is a known team but not on today's scoreboard simply did not
     play today, so it gets no near-miss warning. A poll name that is no known team
     at all (like "Alabama Huntsville" for the scoreboard's "UAH") still does.
+
+    When `records` (a dict) is given, it is filled with {seo: record} for each matched
+    entry that has a record; the best-ranked entry wins if a team matches twice.
     """
     teams: dict[str, Team] = {}
     for g in games:
@@ -114,6 +147,10 @@ def build_rank_map(
                 continue  # a team we know that is not on today's scoreboard: it did not play
             unmatched.append(entry)
             continue
+        best_so_far = rank_map.get(seo)
+        if records is not None and entry.record and (
+                best_so_far is None or entry.rank < best_so_far):
+            records[seo] = entry.record
         rank_map[seo] = min(entry.rank, rank_map.get(seo, entry.rank))
 
     warnings = []

@@ -9,22 +9,24 @@ from upsets.models import Game
 GENDERS = ("men", "women")
 
 
-def roster_path(root: Path) -> Path:
-    return Path(root) / "data" / "teams.json"
+def roster_path(root: Path, division: str = "d2") -> Path:
+    name = "teams.json" if division == "d2" else f"teams_{division}.json"
+    return Path(root) / "data" / name
 
 
 def empty_roster() -> dict[str, dict[str, str]]:
     return {g: {} for g in GENDERS}
 
 
-def load_roster(root: Path, warnings: Optional[list] = None) -> dict[str, dict[str, str]]:
+def load_roster(root: Path, warnings: Optional[list] = None,
+                division: str = "d2") -> dict[str, dict[str, str]]:
     """Every team seen on a scoreboard this season: {gender: {seo: name}}.
 
     A missing file is normal (first run) and gives an empty roster. An unreadable one
     also gives an empty roster, plus a warning: the effect is more name warnings,
     never fewer.
     """
-    path = roster_path(root)
+    path = roster_path(root, division)
     if not path.exists():
         return empty_roster()
     try:
@@ -39,7 +41,7 @@ def load_roster(root: Path, warnings: Optional[list] = None) -> dict[str, dict[s
         return out
     except (OSError, ValueError, AttributeError) as e:
         if warnings is not None:
-            warnings.append(f"data/teams.json couldn't be read ({type(e).__name__}) — "
+            warnings.append(f"data/{path.name} couldn't be read ({type(e).__name__}) — "
                             "name warnings may be noisier than usual.")
         return empty_roster()
 
@@ -57,8 +59,8 @@ def add_games(roster: dict, gender: str, games: list[Game]) -> int:
     return new
 
 
-def save_roster(roster: dict, root: Path) -> Path:
-    path = roster_path(root)
+def save_roster(roster: dict, root: Path, division: str = "d2") -> Path:
+    path = roster_path(root, division)
     path.parent.mkdir(parents=True, exist_ok=True)
     ordered = {g: dict(sorted(roster[g].items())) for g in GENDERS}
     path.write_text(json.dumps(ordered, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

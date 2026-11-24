@@ -20,5 +20,13 @@
       "Grand Valley State": ["fort-valley-st"],
       "Colorado Mesa": ["colorado-mines"]
     }
+  },
+  "d1": {
+    "men": {},
+    "women": {},
+    "not_same": {
+      "men": {},
+      "women": {}
+    }
   }
 }

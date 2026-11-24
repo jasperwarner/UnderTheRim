@@ -7,7 +7,7 @@ from datetime import date
 from pathlib import Path
 
 from upsets.models import Game, Poll, PollEntry, Team
-from upsets.names import build_rank_map, load_aliases, normalize
+from upsets.names import aliases_for, build_rank_map, load_aliases, normalize
 from upsets.sources import parse_nabc, parse_scoreboard, parse_wbca
 
 FIX = Path(__file__).parent / "fixtures"
@@ -230,6 +230,41 @@ class KnownTeamsTest(unittest.TestCase):
         self.assertEqual(len(warnings), 1)
 
 
+class RecordsTest(unittest.TestCase):
+    def _poll(self, *entries):
+        return Poll("men", "t", date(2026, 11, 15),
+                    [PollEntry(r, n, rec) for r, n, rec in entries], "src", "label", "d1")
+
+    def test_records_filled_for_matched_entries(self):
+        g = [game(team("duke", "Duke"), team("unc", "North Carolina"))]
+        records = {}
+        rank_map, _ = build_rank_map(
+            self._poll((1, "Duke", "3-0"), (2, "Kansas", "2-0"), (3, "North Carolina", "")),
+            g, {}, records=records)
+        self.assertEqual(rank_map, {"duke": 1, "unc": 3})
+        self.assertEqual(records, {"duke": "3-0"})  # unmatched and blank records left out
+
+    def test_best_ranked_duplicate_wins(self):
+        g = [game(team("duke", "Duke"), team("z", "Zzz"))]
+        records = {}
+        build_rank_map(self._poll((5, "Duke", "5-1"), (2, "Duke", "2-0")), g, {},
+                       records=records)
+        self.assertEqual(records, {"duke": "2-0"})
+
+    def test_records_left_alone_when_not_given(self):
+        g = [game(team("duke", "Duke"), team("z", "Zzz"))]
+        rank_map, warnings = build_rank_map(self._poll((1, "Duke", "3-0")), g, {})
+        self.assertEqual((rank_map, warnings), ({"duke": 1}, []))
+
+    def test_d1_near_miss_warning_still_fires(self):
+        g = [game(team("saint-marys-ca", "Saint Mary's (CA)"), team("duke", "Duke"))]
+        _, warnings = build_rank_map(self._poll((9, "Saint Mary's", "4-0")), g, {})
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("(men)", warnings[0])
+        self.assertIn("Saint Mary's", warnings[0])
+        self.assertIn("saint-marys-ca", warnings[0])
+
+
 class LoadAliasesTest(unittest.TestCase):
     def _load(self, text):
         with tempfile.TemporaryDirectory() as tmp:
@@ -257,6 +292,52 @@ class LoadAliasesTest(unittest.TestCase):
     def test_real_file_loads(self):
         al = load_aliases(ALIASES)
         self.assertEqual(al["not_same"]["women"]["Grand Valley State"], ["fort-valley-st"])
+
+    def test_real_file_d2_values_unchanged_and_d1_empty(self):
+        al = load_aliases(ALIASES)
+        self.assertEqual(al["men"]["Oklahoma Baptist"], "okla-baptist")
+        self.assertEqual(al["women"]["Embry-Riddle"], "embry-riddle-fl")
+        self.assertEqual(al["not_same"]["men"], {"Nova Southeastern": ["ga-southwestern"]})
+        self.assertEqual(al["d1"], {"men": {}, "women": {},
+                                    "not_same": {"men": {}, "women": {}}})
+
+    def test_d1_section_absent_is_empty(self):
+        al = self._load(json.dumps({"men": {"A": "a"}}))
+        self.assertEqual(al["d1"], {"men": {}, "women": {},
+                                    "not_same": {"men": {}, "women": {}}})
+
+    def test_d1_section_loads_with_same_shape(self):
+        al = self._load(json.dumps({"d1": {"men": {"UConn": "uconn"},
+                                           "not_same": {"women": {"X": ["y"]}}}}))
+        self.assertEqual(al["d1"]["men"], {"UConn": "uconn"})
+        self.assertEqual(al["d1"]["women"], {})
+        self.assertEqual(al["d1"]["not_same"], {"men": {}, "women": {"X": ["y"]}})
+        self.assertEqual(al["men"], {})  # D2 untouched
+
+    def test_bad_d1_shapes_raise_value_error(self):
+        for bad in ({"d1": []}, {"d1": {"men": [1]}}, {"d1": {"men": {"A": 1}}},
+                    {"d1": {"not_same": {"men": {"A": "a"}}}}, {"d1": {"not_same": []}}):
+            with self.assertRaises(ValueError, msg=bad):
+                self._load(json.dumps(bad))
+
+
+class AliasesForTest(unittest.TestCase):
+    def test_d2_is_the_top_level(self):
+        al = {"men": {"A": "a"}, "women": {}, "not_same": {"men": {}, "women": {}},
+              "d1": {"men": {"B": "b"}, "women": {}, "not_same": {"men": {}, "women": {}}}}
+        got = aliases_for(al, "d2")
+        self.assertEqual(got["men"], {"A": "a"})
+        self.assertEqual(got["not_same"], {"men": {}, "women": {}})
+
+    def test_d1_is_the_d1_section(self):
+        d1 = {"men": {"B": "b"}, "women": {}, "not_same": {"men": {}, "women": {}}}
+        al = {"men": {}, "women": {}, "not_same": {"men": {}, "women": {}}, "d1": d1}
+        self.assertEqual(aliases_for(al, "d1"), d1)
+
+    def test_d1_missing_gives_empty_structure(self):
+        al = {"men": {"A": "a"}, "women": {}, "not_same": {"men": {}, "women": {}}}
+        self.assertEqual(aliases_for(al, "d1"),
+                         {"men": {}, "women": {}, "not_same": {"men": {}, "women": {}}})
 
 
 if __name__ == "__main__":

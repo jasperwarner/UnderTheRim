@@ -9,10 +9,10 @@ from upsets.models import Poll, PollEntry
 from upsets.polls_store import poll_for, save_poll
 
 
-def make_poll(as_of, gender="men"):
+def make_poll(as_of, gender="men", division="d2"):
     return Poll(gender, "Coaches Poll", as_of,
                 [PollEntry(1, "Queens (NC)"), PollEntry(2, "St. Mary’s")],
-                "test", "Week test")
+                "test", "Week test", division)
 
 
 class PollsStoreTest(unittest.TestCase):
@@ -64,6 +64,52 @@ class PollsStoreTest(unittest.TestCase):
     def test_missing_directory_returns_none(self):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIsNone(poll_for("women", date(2026, 11, 23), Path(tmp)))
+
+    def test_d1_poll_saves_beside_d2_not_inside_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d1 = save_poll(make_poll(date(2026, 11, 22), division="d1"), root)
+            d2 = save_poll(make_poll(date(2026, 11, 22)), root)
+            self.assertEqual(d1, root / "data" / "polls" / "d1" / "men" / "2026-11-22.json")
+            self.assertEqual(d2, root / "data" / "polls" / "men" / "2026-11-22.json")
+
+    def test_poll_for_never_crosses_divisions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            save_poll(make_poll(date(2026, 11, 15), division="d1"), root)
+            self.assertIsNone(poll_for("men", date(2026, 11, 23), root))
+            self.assertIsNone(poll_for("men", date(2026, 11, 23), root, division="d2"))
+            got = poll_for("men", date(2026, 11, 23), root, division="d1")
+            self.assertEqual(got.division, "d1")
+            self.assertEqual(got.as_of, date(2026, 11, 15))
+            save_poll(make_poll(date(2026, 11, 20)), root)
+            self.assertEqual(poll_for("men", date(2026, 11, 23), root).division, "d2")
+            self.assertEqual(poll_for("men", date(2026, 11, 23), root, division="d1").as_of,
+                             date(2026, 11, 15))
+
+    def test_d1_corrupt_file_warning_is_skipped_and_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "data" / "polls" / "d1" / "women"
+            d.mkdir(parents=True)
+            (d / "2026-11-22.json").write_text("{oops")
+            warnings = []
+            self.assertIsNone(poll_for("women", date(2026, 11, 23), root, warnings, "d1"))
+            self.assertEqual(len(warnings), 1)
+            self.assertIn("2026-11-22.json", warnings[0])
+
+    def test_old_d2_file_without_division_key_still_loads(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "data" / "polls" / "men"
+            d.mkdir(parents=True)
+            old = make_poll(date(2026, 11, 22)).to_json()
+            del old["division"]
+            (d / "2026-11-22.json").write_text(json.dumps(old))
+            got = poll_for("men", date(2026, 11, 23), root)
+            self.assertEqual(got.division, "d2")
+            self.assertEqual(got.entries[0].name, "Queens (NC)")
 
 
 if __name__ == "__main__":

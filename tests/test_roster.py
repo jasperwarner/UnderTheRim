@@ -68,6 +68,37 @@ class RosterTest(unittest.TestCase):
             self.assertEqual(load_roster(self.root, warnings), empty_roster(), bad)
             self.assertEqual(len(warnings), 1, bad)
 
+    def test_roster_paths_by_division(self):
+        self.assertEqual(roster_path(self.root), self.root / "data" / "teams.json")
+        self.assertEqual(roster_path(self.root, "d2"), self.root / "data" / "teams.json")
+        self.assertEqual(roster_path(self.root, "d1"), self.root / "data" / "teams_d1.json")
+
+    def test_d1_roster_is_separate_from_d2(self):
+        d2 = empty_roster()
+        add_games(d2, "men", [game(team("a-seo", "A"), team("b-seo", "B"))])
+        d1 = empty_roster()
+        add_games(d1, "men", [game(team("uconn", "UConn"), team("duke", "Duke"))])
+        save_roster(d2, self.root)
+        save_roster(d1, self.root, "d1")
+        self.assertEqual(load_roster(self.root, []), d2)
+        self.assertEqual(load_roster(self.root, [], "d1"), d1)
+        self.assertNotIn("uconn", load_roster(self.root, [])["men"])
+
+    def test_d1_missing_file_is_empty_without_warning(self):
+        save_roster(empty_roster(), self.root)  # only D2's file exists
+        warnings = []
+        self.assertEqual(load_roster(self.root, warnings, "d1"), empty_roster())
+        self.assertEqual(warnings, [])
+
+    def test_d1_corrupt_file_warning_names_its_file(self):
+        path = roster_path(self.root, "d1")
+        path.parent.mkdir(parents=True)
+        path.write_text("{not json", encoding="utf-8")
+        warnings = []
+        self.assertEqual(load_roster(self.root, warnings, "d1"), empty_roster())
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("teams_d1.json", warnings[0])
+
 
 if __name__ == "__main__":
     unittest.main()
