@@ -63,6 +63,24 @@ class SourcesTest(unittest.TestCase):
         self.assertEqual(p.label, "NABC thru Nov 15")
         self.assertFalse(any("(" in e.name for e in p.entries))
 
+    def test_nabc_new_column_name(self):
+        # The API renamed "SCHOOL (1ST VOTES)" to "SCHOOL" (seen Nov 22).
+        p = parse_nabc(jload("nabc_2026-11-22.json"))
+        self.assertEqual(len(p.entries), 25)
+        self.assertEqual(p.entries[0], PollEntry(1, "Gannon, Pa."))
+        self.assertEqual(p.as_of, date(2026, 11, 22))
+        self.assertEqual(p.label, "NABC thru Nov 22")
+        self.assertFalse(any("(" in e.name for e in p.entries))
+        self.assertEqual({e.rank: e.name for e in p.entries}[19], "Cal State San Bernardino")
+
+    def test_nabc_old_and_new_column_give_same_entries(self):
+        old = jload("nabc_2026-11-15.json")
+        new = copy.deepcopy(old)
+        for r in new["data"]:
+            r["SCHOOL"] = r.pop("SCHOOL (1ST VOTES)")
+        self.assertEqual(parse_nabc(new).entries, parse_nabc(old).entries)
+        self.assertEqual(parse_nabc(old).entries[0], PollEntry(1, "Gannon"))
+
     def test_wbca(self):
         p = parse_wbca((FIX / "wbca_2026-11-17.html").read_text(encoding="utf-8"))
         self.assertEqual(len(p.entries), 25)
@@ -168,8 +186,12 @@ class ParserRobustnessTest(unittest.TestCase):
         bad_rank["data"][0]["RANK"] = "one"
         bad_school = copy.deepcopy(good)
         bad_school["data"][0]["SCHOOL (1ST VOTES)"] = None
+        no_school = copy.deepcopy(good)
+        del no_school["data"][0]["SCHOOL (1ST VOTES)"]
+        bad_new_school = copy.deepcopy(jload("nabc_2026-11-22.json"))
+        bad_new_school["data"][0]["SCHOOL"] = None
         for data in ([], {"updated": 5}, dict(good, data=None), bad_date, bad_rank,
-                     bad_school, "text"):
+                     bad_school, no_school, bad_new_school, "text"):
             self.assertParseError(parse_nabc, data)
 
     def test_wbca_bad_inputs(self):

@@ -103,7 +103,9 @@ def parse_nabc(data: dict) -> Poll:
             rank = _rank(r["RANK"])
             if rank is None:
                 raise ParseError(f"unreadable NABC rank {r['RANK']!r}")
-            school = re.sub(r"\s*\(\d+\)\s*$", "", _str(r["SCHOOL (1ST VOTES)"])).strip()
+            # The column was "SCHOOL (1ST VOTES)" until Nov 2026, now "SCHOOL".
+            raw = r["SCHOOL"] if "SCHOOL" in r else r["SCHOOL (1ST VOTES)"]
+            school = re.sub(r"\s*\(\d+\)\s*$", "", _str(raw)).strip()
             entries.append(PollEntry(rank, school))
         title = _str(data.get("title", "NABC Coaches")) or "NABC Coaches"
     except ParseError:
