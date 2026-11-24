@@ -1,0 +1,22 @@
+D2 upsets for 2026-11-21 — Check data
+
+⚠️ Data warnings
+- Not final (men): Selma at AUM — pre.
+- Possible name mismatch (women): poll "Grand Valley State" vs scoreboard "Fort Valley St." (fort-valley-st) — add to aliases.json
+
+Men's
+- Close (2 pts) — No. 15 Minnesota St. beat Northern Mich., 79-77  https://www.ncaa.com/game/6665635
+- Upset · Close (2 pts) — Unranked Cedarville beat No. 25 Lincoln Memorial, 76-74  https://www.ncaa.com/game/6665426
+- Close (1 pts) — No. 7 West Liberty beat Shepherd, 88-87  https://www.ncaa.com/game/6662823
+- Upset — Unranked St. Cloud St. beat No. 20 Lake Superior St., 76-62  https://www.ncaa.com/game/6664479
+- Close (2 pts) — No. 12 Okla. Baptist beat Emporia St., 87-85  https://www.ncaa.com/game/6673132
+- Upset — Unranked Minn. Duluth beat No. 19 Michigan Tech, 80-76  https://www.ncaa.com/game/6676633
+- Upset — Unranked Sioux Falls beat No. 8 Black Hills St., 71-54  https://www.ncaa.com/game/6673913
+- Overtime — No. 3 DBU beat Henderson St., 89-82  https://www.ncaa.com/game/6678033
+
+Women's
+- Close (2 pts) · Overtime — No. 22 Fairmont St. beat Bloomsburg, 81-79  https://www.ncaa.com/game/6657455
+- Upset — Unranked Maryville (MO) beat No. 16 Concordia-St. Paul, 77-70  https://www.ncaa.com/game/6659346
+- Upset — Unranked North Georgia beat No. 8 Carson-Newman, 62-53  https://www.ncaa.com/game/6657913
+
+Men: 109 final games checked · Women: 109
