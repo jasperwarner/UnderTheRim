@@ -108,7 +108,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     fatal = False
     scoreboards_down = 0
     total_games = 0
-    polls_missing = 0
+    polls_missing = {d: 0 for d in divisions}  # per division: slots with no poll
     failed: set = set()  # slots that crashed part-way: their teams stay off the roster
     unchecked: set = set()  # slots the report must show as "Not checked", never "No flags."
     ranked_skipped: set = set()  # the unchecked slots that did read their scoreboard
@@ -148,7 +148,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
 
                 poll = _pick_poll(gender, day, root, fetched, warnings, division, pre)
                 if poll is None:
-                    polls_missing += 1
+                    polls_missing[division] += 1
                     unchecked.add(key)
                     ranked_skipped.add(key)
                     warnings.append(f"{pre}{poss} poll couldn't be read today — "
@@ -216,8 +216,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
                                 f"checked — unexpected error: {_error_text(e, secrets)}. "
                                 "Other divisions' results are still shown.")
 
-    if polls_missing == len(keys):
-        fatal = True
+    if any(n == len(GENDERS) for n in polls_missing.values()):
+        fatal = True  # a division with no poll at all is entirely unranked
 
     polls_text = " | ".join(
         f"{d.upper()}: " + " · ".join(polls_used[(d, g)] for g in GENDERS) for d in divisions)

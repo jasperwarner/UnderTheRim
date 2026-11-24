@@ -171,8 +171,8 @@ class MainRunTest(unittest.TestCase):
     def test_failed_boxscore_warns(self):
         r = run_d2(date(2026, 11, 21), self.root, dry_run=True,
                 fetch=make_fetch(boxscore="fail"), notion=None)
-        if r.flag_count:
-            self.assertTrue(any(w.startswith("No box score for ") for w in r.warnings))
+        self.assertGreater(r.flag_count, 0)
+        self.assertTrue(any(w.startswith("No box score for ") for w in r.warnings))
 
     def test_big_scorer_added(self):
         box = [PlayerLine("Big Guy", "x", 40)]
@@ -421,14 +421,20 @@ class TwoDivisionRunTest(unittest.TestCase):
         self.assertFalse(r.fatal)
         self.assertTrue(r.polls_used.startswith("D1: Men none · Women AP thru Nov 22 | "))
 
-    def test_some_polls_missing_is_not_fatal_but_all_is(self):
-        r = run(BOTH_DAY, self.root, dry_run=True, notion=None,
-                fetch=make_fetch(men_poll=False, women_poll=False))
-        self.assertFalse(r.fatal)
-        r = run(BOTH_DAY, self.root, dry_run=True, notion=None,
-                fetch=make_fetch(men_poll=False, women_poll=False,
-                                 d1_men_poll=False, d1_women_poll=False))
-        self.assertTrue(r.fatal)
+    def test_one_poll_missing_in_a_division_is_not_fatal(self):
+        for kwargs in ({"d1_men_poll": False}, {"men_poll": False},
+                       {"d1_men_poll": False, "women_poll": False}):
+            r = run(BOTH_DAY, self.root, dry_run=True, notion=None, fetch=make_fetch(**kwargs))
+            self.assertFalse(r.fatal, kwargs)
+
+    def test_a_division_with_every_poll_missing_is_fatal(self):
+        for kwargs in ({"men_poll": False, "women_poll": False},
+                       {"d1_men_poll": False, "d1_women_poll": False},
+                       {"men_poll": False, "women_poll": False,
+                        "d1_men_poll": False, "d1_women_poll": False}):
+            r = run(BOTH_DAY, self.root, dry_run=True, notion=None, fetch=make_fetch(**kwargs))
+            self.assertTrue(r.fatal, kwargs)
+            self.assertEqual(r.status, "Failed")
 
     def _write_aliases(self, mutate):
         data = json.loads(ROOT_ALIASES.read_text(encoding="utf-8"))
