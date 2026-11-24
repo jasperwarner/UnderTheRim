@@ -331,6 +331,50 @@ class MainEntryTest(unittest.TestCase):
         rc = main(["--date", "2026-11-21"], fetch=make_fetch(), root=self.root, env={})
         self.assertEqual(rc, 1)
 
+    def _aliases_without_not_same(self):
+        data = json.loads(ROOT_ALIASES.read_text(encoding="utf-8"))
+        data["not_same"] = {"men": {}, "women": {}}
+        (self.root / "aliases.json").write_text(json.dumps(data), encoding="utf-8")
+
+    def _gvsu_warnings(self, r):
+        return [w for w in r.warnings if "Grand Valley State" in w]
+
+    def test_without_roster_look_alike_warns(self):
+        self._aliases_without_not_same()
+        r = run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertEqual(len(self._gvsu_warnings(r)), 1)
+
+    def test_known_team_off_today_gets_no_warning(self):
+        self._aliases_without_not_same()
+        (self.root / "data").mkdir()
+        (self.root / "data" / "teams.json").write_text(json.dumps(
+            {"men": {}, "women": {"grand-valley-st": "Grand Valley State"}}), encoding="utf-8")
+        r = run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertEqual(self._gvsu_warnings(r), [])
+
+    def test_real_run_saves_roster(self):
+        run(date(2026, 11, 21), self.root, dry_run=False, fetch=make_fetch(), notion=FakeNotion())
+        saved = json.loads((self.root / "data" / "teams.json").read_text())
+        self.assertEqual(saved["men"]["ala-huntsville"], "UAH")
+        self.assertIn("fort-valley-st", saved["women"])
+
+    def test_dry_run_does_not_touch_roster(self):
+        run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertFalse((self.root / "data" / "teams.json").exists())
+
+    def test_corrupt_roster_warns_and_run_continues(self):
+        (self.root / "data").mkdir()
+        (self.root / "data" / "teams.json").write_text("{nope", encoding="utf-8")
+        r = run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertTrue(any("teams.json couldn't be read" in w for w in r.warnings))
+        self.assertFalse(r.fatal)
+
+    def test_roster_grows_across_runs(self):
+        run(date(2026, 11, 21), self.root, dry_run=False, fetch=make_fetch(), notion=FakeNotion())
+        first = json.loads((self.root / "data" / "teams.json").read_text())
+        run(date(2026, 11, 21), self.root, dry_run=False, fetch=make_fetch(), notion=FakeNotion())
+        self.assertEqual(json.loads((self.root / "data" / "teams.json").read_text()), first)
+
     def test_dry_run_returns_0_without_notion(self):
         def no_factory(token, db):
             raise AssertionError("no Notion in dry run")

@@ -158,6 +158,78 @@ class NamesTest(unittest.TestCase):
         self.assertEqual(women[0]["ala-huntsville"], 10)
 
 
+class KnownTeamsTest(unittest.TestCase):
+    """The season roster: a ranked team we have seen before that is simply off today."""
+
+    KNOWN = {"nova-southeastern": "Nova Southeastern", "ga-southwestern": "Ga. Southwestern",
+             "ala-huntsville": "UAH"}
+
+    def test_known_team_not_playing_gets_no_warning(self):
+        g = [game(team("ga-southwestern", "Ga. Southwestern"), team("z", "Zzz"))]
+        rank_map, warnings = build_rank_map(poll((5, "Nova Southeastern")), g, {},
+                                            known=self.KNOWN)
+        self.assertEqual((rank_map, warnings), ({}, []))
+
+    def test_without_roster_the_look_alike_still_warns(self):
+        g = [game(team("ga-southwestern", "Ga. Southwestern"), team("z", "Zzz"))]
+        _, warnings = build_rank_map(poll((5, "Nova Southeastern")), g, {})
+        self.assertEqual(len(warnings), 1)
+
+    def test_real_mismatch_still_warns_with_roster(self):
+        # "Alabama Huntsville" is not any known name or seo, so it is not "just off today".
+        g = [game(team("ala-huntsville", "UAH"), team("z", "Zzz"))]
+        rank_map, warnings = build_rank_map(poll((9, "Alabama Huntsville")), g, {},
+                                            known=self.KNOWN)
+        self.assertEqual(rank_map, {})
+        self.assertEqual(len(warnings), 1)
+        self.assertIn('"UAH" (ala-huntsville)', warnings[0])
+
+    def test_cal_state_eastbay_still_warns_with_roster(self):
+        g = [game(team("cal-st-east-bay", "Cal St. East Bay"), team("other", "Zzz"))]
+        _, warnings = build_rank_map(poll((1, "Cal State Eastbay")), g, {},
+                                     known={"cal-st-la": "Cal State LA"})
+        self.assertEqual(len(warnings), 1)
+
+    def test_alias_to_known_team_off_today_gets_no_warning(self):
+        g = [game(team("ga-southwestern", "Ga. Southwestern"), team("z", "Zzz"))]
+        known = {"ala-huntsville": "UAH"}
+        rank_map, warnings = build_rank_map(poll((9, "Alabama Huntsville")), g,
+                                            {"Alabama Huntsville": "ala-huntsville"}, known=known)
+        self.assertEqual((rank_map, warnings), ({}, []))
+
+    def test_typo_alias_target_is_not_known_so_it_still_warns(self):
+        g = [game(team("ala-huntsville", "UAH"), team("z", "Zzz"))]
+        _, warnings = build_rank_map(poll((9, "Alabama Huntsville")), g,
+                                     {"Alabama Huntsville": "ala-hunstville"}, known=self.KNOWN)
+        self.assertEqual(len(warnings), 1)
+
+    def test_renamed_team_on_todays_board_is_matched_by_seo(self):
+        # Known as "Nova Southeastern"; today the scoreboard calls the same seo something else.
+        g = [game(team("nova-southeastern", "Nova Southeastern Univ"), team("z", "Zzz"))]
+        rank_map, warnings = build_rank_map(poll((5, "Nova Southeastern")), g, {},
+                                            known=self.KNOWN)
+        self.assertEqual(rank_map, {"nova-southeastern": 5})
+        self.assertEqual(warnings, [])
+
+    def test_known_name_form_with_punctuation(self):
+        known = {"minn-st-mankato": "Minnesota St."}
+        g = [game(team("z", "Zzz"), team("y", "Yyy"))]
+        rank_map, warnings = build_rank_map(poll((3, "Minnesota State")), g, {}, known=known)
+        self.assertEqual((rank_map, warnings), ({}, []))
+
+    def test_roster_does_not_hide_other_unknown_teams(self):
+        g = [game(team("cal-st-east-bay", "Cal St. East Bay"), team("other", "Zzz"))]
+        _, warnings = build_rank_map(
+            poll((5, "Nova Southeastern"), (1, "Cal State Eastbay")), g, {}, known=self.KNOWN)
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("Cal State Eastbay", warnings[0])
+
+    def test_empty_roster_behaves_like_no_roster(self):
+        g = [game(team("ga-southwestern", "Ga. Southwestern"), team("z", "Zzz"))]
+        _, warnings = build_rank_map(poll((5, "Nova Southeastern")), g, {}, known={})
+        self.assertEqual(len(warnings), 1)
+
+
 class LoadAliasesTest(unittest.TestCase):
     def _load(self, text):
         with tempfile.TemporaryDirectory() as tmp:

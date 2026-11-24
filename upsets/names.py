@@ -62,10 +62,36 @@ def load_aliases(path: Path) -> dict:
     return out
 
 
+def _known_index(known: Optional[dict[str, str]]) -> dict[str, str]:
+    """Normalized name or seo-with-spaces -> seo, for every team seen this season."""
+    index: dict[str, str] = {}
+    for seo, name in (known or {}).items():
+        index.setdefault(normalize(name), seo)
+        index.setdefault(seo.replace("-", " "), seo)
+    return index
+
+
+def _resolve_known(want: str, known: dict[str, str], known_index: dict[str, str],
+                   norm_aliases: dict[str, str]) -> Optional[str]:
+    """The seo of a team seen earlier this season that this poll name refers to."""
+    alias = norm_aliases.get(want)
+    if alias is not None and alias in known:
+        return alias
+    return known_index.get(want)
+
+
 def build_rank_map(
     poll: Poll, games: list[Game], aliases: dict[str, str],
     not_same: Optional[dict[str, list[str]]] = None,
+    known: Optional[dict[str, str]] = None,
 ) -> tuple[dict[str, int], list[str]]:
+    """Match poll names to today's scoreboard teams.
+
+    `known` is the season roster ({seo: name} of every team seen on any scoreboard).
+    A poll name that is a known team but not on today's scoreboard simply did not
+    play today, so it gets no near-miss warning. A poll name that is no known team
+    at all (like "Alabama Huntsville" for the scoreboard's "UAH") still does.
+    """
     teams: dict[str, Team] = {}
     for g in games:
         for t in (g.home, g.away):
@@ -73,6 +99,8 @@ def build_rank_map(
                 teams.setdefault(t.seo, t)
 
     norm_aliases = {normalize(k): v for k, v in aliases.items()}
+    known = known or {}
+    known_index = _known_index(known)
     norm_not_same: dict[str, set[str]] = {}
     for k, seos in (not_same or {}).items():
         norm_not_same.setdefault(normalize(k), set()).update(seos)
@@ -80,8 +108,10 @@ def build_rank_map(
     rank_map: dict[str, int] = {}
     unmatched = []
     for entry in poll.entries:
-        seo = _match(entry.name, teams, norm_aliases)
+        seo = _match(entry.name, teams, norm_aliases, known, known_index)
         if seo is None:
+            if _resolve_known(normalize(entry.name), known, known_index, norm_aliases):
+                continue  # a team we know that is not on today's scoreboard: it did not play
             unmatched.append(entry)
             continue
         rank_map[seo] = min(entry.rank, rank_map.get(seo, entry.rank))
@@ -109,7 +139,9 @@ def build_rank_map(
     return rank_map, warnings
 
 
-def _match(name: str, teams: dict[str, Team], norm_aliases: dict[str, str]):
+def _match(name: str, teams: dict[str, Team], norm_aliases: dict[str, str],
+           known: Optional[dict[str, str]] = None,
+           known_index: Optional[dict[str, str]] = None):
     want = normalize(name)
     alias = norm_aliases.get(want)
     if alias is not None and alias in teams:
@@ -121,5 +153,10 @@ def _match(name: str, teams: dict[str, Team], norm_aliases: dict[str, str]):
             return seo
     for seo in teams:
         if seo.replace("-", " ") == want:
+            return seo
+    if known:
+        # Same school (same seo) that the scoreboard now spells differently.
+        seo = _resolve_known(want, known, known_index or {}, norm_aliases)
+        if seo in teams:
             return seo
     return None

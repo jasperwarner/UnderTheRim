@@ -16,6 +16,7 @@ from .names import build_rank_map, load_aliases
 from .notion import NotionClient, NotionError
 from .polls_store import poll_for, save_poll
 from .report import Report, to_json, to_text
+from .roster import add_games, load_roster, save_roster
 from .rules import add_big_scorers, boxscore_complete, flag_games
 from .sources import ParseError
 
@@ -70,6 +71,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     warnings: list[str] = []
     aliases = _safe_aliases(root, warnings)
     d2_conferences = _safe_d2_conferences(root, warnings)
+    roster = load_roster(root, warnings)
     flags: dict[str, list] = {g: [] for g in GENDERS}
     all_games: dict[str, list] = {g: [] for g in GENDERS}
     final_counts = {g: 0 for g in GENDERS}
@@ -138,7 +140,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         ranks: dict[str, int] = {}
         if poll is not None:
             ranks, name_warnings = build_rank_map(poll, games, aliases[gender],
-                                                  aliases["not_same"][gender])
+                                                  aliases["not_same"][gender],
+                                                  known=roster[gender])
             warnings.extend(name_warnings)
         gender_flags = flag_games(games, ranks, d2_conferences)
         for flag in gender_flags:
@@ -173,6 +176,12 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         return report
     data_dir = root / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
+    try:  # remember today's teams, so a ranked team that is off tomorrow is recognized
+        for gender in GENDERS:
+            add_games(roster, gender, all_games[gender])
+        save_roster(roster, root)
+    except OSError as e:
+        print(f"Warning: could not save data/teams.json: {type(e).__name__}", file=sys.stderr)
     (data_dir / f"{day.isoformat()}.json").write_text(
         json.dumps(to_json(report), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     if notion is not None:

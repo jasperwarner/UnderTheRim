@@ -119,6 +119,8 @@ At about 6–7 AM Eastern, a new page appears in your database for the previous 
 
 Sometimes a team is spelled differently in the poll and on the scoreboard, so the program can't tell whether they are the same team. The warning names both spellings. Sometimes they really are two different schools that just have similar names (for example "Grand Valley State" and "Fort Valley St.").
 
+The program keeps a list of every team it has seen on a scoreboard this season (the file `data/teams.json`, which it updates itself every morning). A ranked team that simply didn't play that day is recognized from that list and does not trigger this warning, so when you do see it, the poll's spelling really doesn't match any team the program has ever seen.
+
 1. First check whether the two names are the same school. A quick web search of both names usually settles it.
 2. **Same school:** tell Claude: "Add an alias for the name mismatch warning from [date]." Claude will add it to `aliases.json` and upload it.
 3. **Different schools:** tell Claude: "These are different schools — add them to not_same for the warning from [date]." That stops the warning for that pair.
