@@ -429,6 +429,36 @@ class TwoDivisionRunTest(unittest.TestCase):
                                  d1_men_poll=False, d1_women_poll=False))
         self.assertTrue(r.fatal)
 
+    def _write_aliases(self, mutate):
+        data = json.loads(ROOT_ALIASES.read_text(encoding="utf-8"))
+        mutate(data)
+        (self.root / "aliases.json").write_text(json.dumps(data), encoding="utf-8")
+
+    def test_bad_d1_aliases_do_not_wipe_d2_aliases(self):
+        bad_shapes = (lambda d: d.__setitem__("d1", {"not_same": {"men": {"X": "not-a-list"}}}),
+                      lambda d: d.__setitem__("d1", ["not", "an", "object"]))
+        for mutate in bad_shapes:
+            self._write_aliases(mutate)
+            r = run(BOTH_DAY, self.root, dry_run=True, fetch=make_fetch(), notion=None)
+            d1_warnings = [w for w in r.warnings if w.startswith("Division I aliases")]
+            self.assertEqual(len(d1_warnings), 1, r.warnings)
+            self.assertIn("D1 name matching may miss ranked teams.", d1_warnings[0])
+            self.assertFalse(any(w.startswith("aliases.json couldn't") for w in r.warnings))
+            # D2's real aliases still work: same flags and no extra D2 name warnings
+            self.assertEqual(_flags(r, ("d2", "men")), D2_MEN_FLAGS)
+            self.assertEqual(_flags(r, ("d2", "women")), D2_WOMEN_FLAGS)
+            self.assertEqual(len(r.flags[("d1", "men")]), 1)
+            self.assertEqual(r.status, "Check data")
+
+    def test_bad_d2_aliases_still_run_d1(self):
+        self._write_aliases(lambda d: d.__setitem__("men", {"A": 1}))
+        r = run(BOTH_DAY, self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertTrue(any(w.startswith("aliases.json couldn't be read (ValueError)")
+                            for w in r.warnings))
+        self.assertFalse(any(w.startswith("Division I aliases") for w in r.warnings))
+        self.assertEqual(len(r.flags[("d1", "men")]), 1)
+        self.assertEqual(len(r.flags[("d1", "women")]), 1)
+
     def test_real_run_saves_d1_poll_and_roster(self):
         run(BOTH_DAY, self.root, dry_run=False, fetch=make_fetch(), notion=FakeNotion())
         self.assertTrue((self.root / "data" / "polls" / "d1" / "men" / "2026-11-22.json")

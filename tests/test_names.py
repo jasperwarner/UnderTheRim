@@ -7,7 +7,8 @@ from datetime import date
 from pathlib import Path
 
 from upsets.models import Game, Poll, PollEntry, Team
-from upsets.names import aliases_for, build_rank_map, load_aliases, normalize
+from upsets.names import (aliases_for, build_rank_map, load_aliases,
+                          load_aliases_by_division, normalize)
 from upsets.sources import parse_nabc, parse_scoreboard, parse_wbca
 
 FIX = Path(__file__).parent / "fixtures"
@@ -372,6 +373,49 @@ class LoadAliasesTest(unittest.TestCase):
                     {"d1": {"not_same": {"men": {"A": "a"}}}}, {"d1": {"not_same": []}}):
             with self.assertRaises(ValueError, msg=bad):
                 self._load(json.dumps(bad))
+
+
+class LoadAliasesByDivisionTest(unittest.TestCase):
+    def _load(self, text):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "aliases.json"
+            path.write_text(text, encoding="utf-8")
+            return load_aliases_by_division(path)
+
+    def test_good_file_has_no_problems_and_matches_load_aliases(self):
+        text = json.dumps({"men": {"A": "a"}, "d1": {"women": {"B": "b"}}})
+        al, problems = self._load(text)
+        self.assertEqual(problems, {})
+        self.assertEqual(al["men"], {"A": "a"})
+        self.assertEqual(al["d1"]["women"], {"B": "b"})
+
+    def test_bad_d1_blanks_only_d1(self):
+        for bad in ({"not_same": {"men": {"X": "a string, not a list"}}}, "oops", ["x"]):
+            data = {"men": {"A": "a"}, "women": {"B": "b"},
+                    "not_same": {"men": {"X": ["y"]}}, "d1": bad}
+            al, problems = self._load(json.dumps(data))
+            self.assertEqual(set(problems), {"d1"}, bad)
+            self.assertEqual(al["men"], {"A": "a"})
+            self.assertEqual(al["not_same"]["men"], {"X": ["y"]})
+            self.assertEqual(al["d1"], {"men": {}, "women": {},
+                                        "not_same": {"men": {}, "women": {}}})
+
+    def test_bad_d2_part_blanks_only_d2(self):
+        al, problems = self._load(json.dumps(
+            {"men": {"A": 1}, "d1": {"men": {"UConn": "uconn"}}}))
+        self.assertEqual(set(problems), {"d2"})
+        self.assertEqual(al["men"], {})
+        self.assertEqual(al["not_same"], {"men": {}, "women": {}})
+        self.assertEqual(al["d1"]["men"], {"UConn": "uconn"})
+
+    def test_both_bad_reports_both(self):
+        _, problems = self._load(json.dumps({"men": [1], "d1": []}))
+        self.assertEqual(set(problems), {"d1", "d2"})
+
+    def test_unreadable_file_still_raises(self):
+        for bad in ("{not json", "[1, 2]"):
+            with self.assertRaises(ValueError, msg=bad):
+                self._load(bad)
 
 
 class AliasesForTest(unittest.TestCase):

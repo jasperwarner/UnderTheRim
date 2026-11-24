@@ -43,6 +43,21 @@ def _list_map(value, where: str) -> dict[str, list[str]]:
     return out
 
 
+def _empty_division() -> dict:
+    return {**{g: {} for g in GENDER_KEYS}, "not_same": {g: {} for g in GENDER_KEYS}}
+
+
+def _load_top_level(data: dict) -> dict:
+    """Division II's aliases: the top-level men / women / not_same keys."""
+    out: dict = {g: _str_map(data.get(g, {}), g) for g in GENDER_KEYS}
+    not_same = data.get("not_same", {})
+    if not isinstance(not_same, dict):
+        raise ValueError("not_same must be an object")
+    out["not_same"] = {g: _list_map(not_same.get(g, {}), f"not_same.{g}")
+                       for g in GENDER_KEYS}
+    return out
+
+
 def load_aliases(path: Path) -> dict:
     """Read aliases.json.
 
@@ -54,14 +69,34 @@ def load_aliases(path: Path) -> dict:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError("aliases.json must be an object")
-    out: dict = {g: _str_map(data.get(g, {}), g) for g in GENDER_KEYS}
-    not_same = data.get("not_same", {})
-    if not isinstance(not_same, dict):
-        raise ValueError("not_same must be an object")
-    out["not_same"] = {g: _list_map(not_same.get(g, {}), f"not_same.{g}")
-                       for g in GENDER_KEYS}
+    out = _load_top_level(data)
     out["d1"] = _load_division(data.get("d1", {}), "d1")
     return out
+
+
+def load_aliases_by_division(path: Path) -> tuple[dict, dict[str, ValueError]]:
+    """Like load_aliases, but a malformed part only blanks its own division.
+
+    Returns (aliases, problems): `problems` maps "d1" / "d2" to the ValueError for that
+    division's part; that division's aliases are empty and the other one is untouched.
+    Still raises ValueError (or OSError) if the file is missing, isn't JSON, or isn't an
+    object, since then neither division can be read.
+    """
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("aliases.json must be an object")
+    problems: dict[str, ValueError] = {}
+    try:
+        out = _load_top_level(data)
+    except ValueError as e:
+        problems["d2"] = e
+        out = _empty_division()
+    try:
+        out["d1"] = _load_division(data.get("d1", {}), "d1")
+    except ValueError as e:
+        problems["d1"] = e
+        out["d1"] = _empty_division()
+    return out, problems
 
 
 def _load_division(data, where: str) -> dict:

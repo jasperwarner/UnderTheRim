@@ -12,7 +12,7 @@ from typing import Optional
 from . import sources
 from .http import FetchError
 from .models import Poll
-from .names import aliases_for, build_rank_map, load_aliases
+from .names import aliases_for, build_rank_map, load_aliases_by_division
 from .notion import NotionClient, NotionError
 from .polls_store import poll_for, save_poll
 from .report import Report, to_json, to_text
@@ -27,13 +27,22 @@ FAR_FUTURE = date(9999, 12, 31)
 
 
 def _safe_aliases(root: Path, warnings: list) -> dict:
+    """Read aliases.json; a malformed part only blanks its own division's aliases."""
     try:
-        return load_aliases(root / "aliases.json")
+        aliases, problems = load_aliases_by_division(root / "aliases.json")
     except (OSError, ValueError, AttributeError, TypeError) as e:
         reason = type(e).__name__
         warnings.append(f"aliases.json couldn't be read ({reason}) — "
                         "name matching may miss ranked teams.")
-        return {"men": {}, "women": {}, "not_same": {"men": {}, "women": {}}}
+        return {"men": {}, "women": {}, "not_same": {"men": {}, "women": {}},
+                "d1": {"men": {}, "women": {}, "not_same": {"men": {}, "women": {}}}}
+    if "d2" in problems:
+        warnings.append(f"aliases.json couldn't be read ({type(problems['d2']).__name__}) — "
+                        "name matching may miss ranked teams.")
+    if "d1" in problems:
+        warnings.append(f"Division I aliases couldn't be read ({problems['d1']}) — "
+                        "D1 name matching may miss ranked teams.")
+    return aliases
 
 
 DIVISIONS = ("d1", "d2")
