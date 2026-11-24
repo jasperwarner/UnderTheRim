@@ -1,0 +1,890 @@
+{
+  "day": "2026-11-23",
+  "status": "Check data",
+  "flag_count": 2,
+  "polls_used": "Men NABC thru Nov 15 · Women WBCA Nov 17",
+  "warnings": [
+    "Not final (men): Central St. (OH) at Simmons (KY) — pre.",
+    "Possible name mismatch (men): poll \"Nova Southeastern\" looks similar to scoreboard \"Ga. Southwestern\" (ga-southwestern) — if they are the same school, add an alias; if not, add them to not_same in aliases.json"
+  ],
+  "final_counts": {
+    "men": 26,
+    "women": 22
+  },
+  "fatal": false,
+  "flags": [
+    {
+      "gender": "men",
+      "game_id": "6674581",
+      "headline": "Unranked West Chester beat No. 7 West Liberty, 107-96",
+      "tags": [
+        "Upset"
+      ],
+      "link": "https://www.ncaa.com/game/6674581",
+      "home": {
+        "seo": "west-chester",
+        "score": 107
+      },
+      "away": {
+        "seo": "west-liberty",
+        "score": 96
+      }
+    },
+    {
+      "gender": "women",
+      "game_id": "6660270",
+      "headline": "Unranked Ferris St. beat No. 20 Northwood, 75-70",
+      "tags": [
+        "Upset"
+      ],
+      "link": "https://www.ncaa.com/game/6660270",
+      "home": {
+        "seo": "northwood-mi",
+        "score": 70
+      },
+      "away": {
+        "seo": "ferris-st",
+        "score": 75
+      }
+    }
+  ],
+  "games": {
+    "men": [
+      {
+        "id": "6676044",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "salem-intl",
+          "name": "Salem (WV)",
+          "score": 69,
+          "conferenceSeo": "dii-independent"
+        },
+        "away": {
+          "seo": "concord",
+          "name": "Concord",
+          "score": 78,
+          "conferenceSeo": "mec"
+        }
+      },
+      {
+        "id": "6678957",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "saint-leo",
+          "name": "Saint Leo",
+          "score": 70,
+          "conferenceSeo": "sunshine-state"
+        },
+        "away": {
+          "seo": "warner-southern",
+          "name": "Warner",
+          "score": 57,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6679075",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "montevallo",
+          "name": "Montevallo",
+          "score": 111,
+          "conferenceSeo": "gulf-south"
+        },
+        "away": {
+          "seo": "pensacola-christian",
+          "name": "Pensacola Christian",
+          "score": 87,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6674581",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "west-chester",
+          "name": "West Chester",
+          "score": 107,
+          "conferenceSeo": "psac"
+        },
+        "away": {
+          "seo": "west-liberty",
+          "name": "West Liberty",
+          "score": 96,
+          "conferenceSeo": "mec"
+        }
+      },
+      {
+        "id": "6675684",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "embry-riddle-fl",
+          "name": "Embry-Riddle (FL)",
+          "score": 119,
+          "conferenceSeo": "sunshine-state"
+        },
+        "away": {
+          "seo": "pr-rio-piedras",
+          "name": "P.R.-Rio Piedras",
+          "score": 63,
+          "conferenceSeo": "dii-independent"
+        }
+      },
+      {
+        "id": "6675840",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "queens-ny",
+          "name": "Queens (NY)",
+          "score": 62,
+          "conferenceSeo": "ecc"
+        },
+        "away": {
+          "seo": "saint-michaels",
+          "name": "Saint Michael's",
+          "score": 66,
+          "conferenceSeo": "ne10"
+        }
+      },
+      {
+        "id": "6676252",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "anderson-sc",
+          "name": "Anderson (SC)",
+          "score": 99,
+          "conferenceSeo": "sac"
+        },
+        "away": {
+          "seo": "clayton-st",
+          "name": "Clayton St.",
+          "score": 89,
+          "conferenceSeo": "peach-belt"
+        }
+      },
+      {
+        "id": "6676273",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "molloy",
+          "name": "Molloy",
+          "score": 98,
+          "conferenceSeo": "ecc"
+        },
+        "away": {
+          "seo": "st-anselm",
+          "name": "Saint Anselm",
+          "score": 82,
+          "conferenceSeo": "ne10"
+        }
+      },
+      {
+        "id": "6676506",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "florida-tech",
+          "name": "Florida Tech",
+          "score": 87,
+          "conferenceSeo": "sunshine-state"
+        },
+        "away": {
+          "seo": "ga-southwestern",
+          "name": "Ga. Southwestern",
+          "score": 61,
+          "conferenceSeo": "peach-belt"
+        }
+      },
+      {
+        "id": "6677010",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "roberts-wesleyan",
+          "name": "Roberts Wesleyan",
+          "score": 84,
+          "conferenceSeo": "ecc"
+        },
+        "away": {
+          "seo": "lock-haven",
+          "name": "Lock Haven",
+          "score": 71,
+          "conferenceSeo": "psac"
+        }
+      },
+      {
+        "id": "6651251",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "east-tenn-st",
+          "name": "ETSU",
+          "score": 108,
+          "conferenceSeo": "socon"
+        },
+        "away": {
+          "seo": "kentucky-st",
+          "name": "Kentucky St.",
+          "score": 56,
+          "conferenceSeo": "siac"
+        }
+      },
+      {
+        "id": "6656128",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "le-moyne",
+          "name": "Le Moyne",
+          "score": 68,
+          "conferenceSeo": "nec"
+        },
+        "away": {
+          "seo": "mansfield",
+          "name": "Mansfield",
+          "score": 58,
+          "conferenceSeo": "psac"
+        }
+      },
+      {
+        "id": "6662762",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "franklin-pierce",
+          "name": "Franklin Pierce",
+          "score": 85,
+          "conferenceSeo": "ne10"
+        },
+        "away": {
+          "seo": "american-intl",
+          "name": "American Int'l",
+          "score": 72,
+          "conferenceSeo": "ne10"
+        }
+      },
+      {
+        "id": "6667291",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "okla-christian",
+          "name": "Okla. Christian",
+          "score": 94,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "hillsdale-baptist",
+          "name": "Randall",
+          "score": 64,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6667792",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "west-va-wesleyan",
+          "name": "West Va. Wesleyan",
+          "score": 71,
+          "conferenceSeo": "mec"
+        },
+        "away": {
+          "seo": "west-va-tech",
+          "name": "West Va. Tech",
+          "score": 74,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6676069",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "daemen",
+          "name": "Daemen",
+          "score": 81,
+          "conferenceSeo": "ecc"
+        },
+        "away": {
+          "seo": "edinboro",
+          "name": "Edinboro",
+          "score": 60,
+          "conferenceSeo": "psac"
+        }
+      },
+      {
+        "id": "6676360",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "ky-wesleyan",
+          "name": "Ky. Wesleyan",
+          "score": 79,
+          "conferenceSeo": "g-mac"
+        },
+        "away": {
+          "seo": "trevecca-nazarene",
+          "name": "Trevecca Nazarene",
+          "score": 64,
+          "conferenceSeo": "gulf-south"
+        }
+      },
+      {
+        "id": "6678544",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "angelo-st",
+          "name": "Angelo St.",
+          "score": 76,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "tex-am-intl",
+          "name": "Tex. A&M Int'l",
+          "score": 68,
+          "conferenceSeo": "lone-star"
+        }
+      },
+      {
+        "id": "6679049",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "northeastern-st",
+          "name": "Northeastern St.",
+          "score": 94,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "haskell",
+          "name": "Haskell",
+          "score": 62,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6662155",
+        "gameState": "pre",
+        "currentPeriod": "",
+        "home": {
+          "seo": "simmons-ky",
+          "name": "Simmons (KY)",
+          "score": null,
+          "conferenceSeo": ""
+        },
+        "away": {
+          "seo": "central-st-oh",
+          "name": "Central St. (OH)",
+          "score": null,
+          "conferenceSeo": "siac"
+        }
+      },
+      {
+        "id": "6676445",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "rollins",
+          "name": "Rollins",
+          "score": 82,
+          "conferenceSeo": "sunshine-state"
+        },
+        "away": {
+          "seo": "pr-bayamon",
+          "name": "P.R.-Bayamon",
+          "score": 54,
+          "conferenceSeo": "dii-independent"
+        }
+      },
+      {
+        "id": "6678920",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "edward-waters",
+          "name": "Edward Waters",
+          "score": 79,
+          "conferenceSeo": "siac"
+        },
+        "away": {
+          "seo": "lane",
+          "name": "Lane",
+          "score": 51,
+          "conferenceSeo": "siac"
+        }
+      },
+      {
+        "id": "6662193",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "newman",
+          "name": "Newman",
+          "score": 88,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "kansas-city-bible",
+          "name": "Kansas Christian",
+          "score": 51,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6662197",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "central-okla",
+          "name": "Central Okla.",
+          "score": 84,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "north-texas-dallas",
+          "name": "UNT Dallas",
+          "score": 52,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6678499",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "southwest-baptist",
+          "name": "Southwest Baptist",
+          "score": 104,
+          "conferenceSeo": "glvc"
+        },
+        "away": {
+          "seo": "calvary-bible",
+          "name": "Calvary",
+          "score": 41,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6678826",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "rogers-st",
+          "name": "Rogers St.",
+          "score": 76,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "ottawa",
+          "name": "Ottawa (KS)",
+          "score": 70,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6665348",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "st-edwards",
+          "name": "St. Edward's",
+          "score": 89,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "arlington-baptist",
+          "name": "Arlington Baptist",
+          "score": 69,
+          "conferenceSeo": ""
+        }
+      }
+    ],
+    "women": [
+      {
+        "id": "6659605",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "pr-rio-piedras",
+          "name": "P.R.-Rio Piedras",
+          "score": 37,
+          "conferenceSeo": "dii-independent"
+        },
+        "away": {
+          "seo": "upper-iowa",
+          "name": "Upper Iowa",
+          "score": 71,
+          "conferenceSeo": "glvc"
+        }
+      },
+      {
+        "id": "6659619",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "fort-lewis",
+          "name": "Fort Lewis",
+          "score": 102,
+          "conferenceSeo": "rmac"
+        },
+        "away": {
+          "seo": "tex-am-intl",
+          "name": "Tex. A&M Int'l",
+          "score": 89,
+          "conferenceSeo": "lone-star"
+        }
+      },
+      {
+        "id": "6659518",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "point-park",
+          "name": "Point Park",
+          "score": 66,
+          "conferenceSeo": "mec"
+        },
+        "away": {
+          "seo": "shippensburg",
+          "name": "Shippensburg",
+          "score": 54,
+          "conferenceSeo": "psac"
+        }
+      },
+      {
+        "id": "6659907",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "northeastern-st",
+          "name": "Northeastern St.",
+          "score": 64,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "texas-dallas",
+          "name": "UT Dallas ",
+          "score": 62,
+          "conferenceSeo": "lone-star"
+        }
+      },
+      {
+        "id": "6657063",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "pitt-johnstown",
+          "name": "Pitt.-Johnstown",
+          "score": 46,
+          "conferenceSeo": "psac"
+        },
+        "away": {
+          "seo": "wheeling-jesuit",
+          "name": "Wheeling",
+          "score": 62,
+          "conferenceSeo": "mec"
+        }
+      },
+      {
+        "id": "6657527",
+        "gameState": "final",
+        "currentPeriod": "FINAL - OT",
+        "home": {
+          "seo": "cedarville",
+          "name": "Cedarville",
+          "score": 68,
+          "conferenceSeo": "g-mac"
+        },
+        "away": {
+          "seo": "indianapolis",
+          "name": "UIndy",
+          "score": 63,
+          "conferenceSeo": "glvc"
+        }
+      },
+      {
+        "id": "6657861",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "winston-salem",
+          "name": "Winston-Salem",
+          "score": 66,
+          "conferenceSeo": "ciaa"
+        },
+        "away": {
+          "seo": "concord",
+          "name": "Concord",
+          "score": 45,
+          "conferenceSeo": "mec"
+        }
+      },
+      {
+        "id": "6658066",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "rollins",
+          "name": "Rollins",
+          "score": 74,
+          "conferenceSeo": "sunshine-state"
+        },
+        "away": {
+          "seo": "pr-bayamon",
+          "name": "P.R.-Bayamon",
+          "score": 54,
+          "conferenceSeo": "dii-independent"
+        }
+      },
+      {
+        "id": "6658553",
+        "gameState": "final",
+        "currentPeriod": "FINAL - OT",
+        "home": {
+          "seo": "edward-waters",
+          "name": "Edward Waters",
+          "score": 63,
+          "conferenceSeo": "siac"
+        },
+        "away": {
+          "seo": "lane",
+          "name": "Lane",
+          "score": 67,
+          "conferenceSeo": "siac"
+        }
+      },
+      {
+        "id": "6661775",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "dist-columbia",
+          "name": "Dist. Columbia",
+          "score": 51,
+          "conferenceSeo": "ecc"
+        },
+        "away": {
+          "seo": "frostburg-st",
+          "name": "Frostburg St.",
+          "score": 68,
+          "conferenceSeo": "mec"
+        }
+      },
+      {
+        "id": "6659291",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "rogers-st",
+          "name": "Rogers St.",
+          "score": 61,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "east-central",
+          "name": "East Central",
+          "score": 48,
+          "conferenceSeo": "gac"
+        }
+      },
+      {
+        "id": "6657280",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "st-edwards",
+          "name": "St. Edward's",
+          "score": 63,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "metro-st",
+          "name": "MSU Denver",
+          "score": 66,
+          "conferenceSeo": "rmac"
+        }
+      },
+      {
+        "id": "6657818",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "midwestern-st",
+          "name": "Midwestern St.",
+          "score": 54,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "harding",
+          "name": "Harding",
+          "score": 72,
+          "conferenceSeo": "gac"
+        }
+      },
+      {
+        "id": "6658667",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "lubbock-christian",
+          "name": "Lubbock Christian",
+          "score": 62,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "southwestern-okla",
+          "name": "Southwestern Okla.",
+          "score": 47,
+          "conferenceSeo": "gac"
+        }
+      },
+      {
+        "id": "6660270",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "northwood-mi",
+          "name": "Northwood",
+          "score": 70,
+          "conferenceSeo": "g-mac"
+        },
+        "away": {
+          "seo": "ferris-st",
+          "name": "Ferris St.",
+          "score": 75,
+          "conferenceSeo": "gliac"
+        }
+      },
+      {
+        "id": "6648492",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "uiw",
+          "name": "UIW",
+          "score": 75,
+          "conferenceSeo": "southland"
+        },
+        "away": {
+          "seo": "tex-am-kingsville",
+          "name": "Tex. A&M-Kingsville",
+          "score": 38,
+          "conferenceSeo": "lone-star"
+        }
+      },
+      {
+        "id": "6657038",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "ala-huntsville",
+          "name": "UAH",
+          "score": 98,
+          "conferenceSeo": "gulf-south"
+        },
+        "away": {
+          "seo": "oakwood",
+          "name": "Oakwood",
+          "score": 31,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6657908",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "nm-highlands",
+          "name": "N.M. Highlands",
+          "score": 54,
+          "conferenceSeo": "rmac"
+        },
+        "away": {
+          "seo": "eastern-nm",
+          "name": "Eastern N.M.",
+          "score": 58,
+          "conferenceSeo": "lone-star"
+        }
+      },
+      {
+        "id": "6657965",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "colo-christian",
+          "name": "Colo. Christian",
+          "score": 75,
+          "conferenceSeo": "rmac"
+        },
+        "away": {
+          "seo": "cameron",
+          "name": "Cameron",
+          "score": 62,
+          "conferenceSeo": "lone-star"
+        }
+      },
+      {
+        "id": "6650668",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "south-ala",
+          "name": "South Alabama",
+          "score": 78,
+          "conferenceSeo": "sun-belt"
+        },
+        "away": {
+          "seo": "clayton-st",
+          "name": "Clayton St.",
+          "score": 42,
+          "conferenceSeo": "peach-belt"
+        }
+      },
+      {
+        "id": "6657239",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "mont-st-billings",
+          "name": "Mont. St. Billings",
+          "score": 57,
+          "conferenceSeo": "great-northwest"
+        },
+        "away": {
+          "seo": "rocky-mountain",
+          "name": "Rocky Mountain",
+          "score": 32,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6657567",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "chaminade",
+          "name": "Chaminade",
+          "score": 68,
+          "conferenceSeo": "pacwest"
+        },
+        "away": {
+          "seo": "azusa-pacific",
+          "name": "Azusa Pacific",
+          "score": 74,
+          "conferenceSeo": "sciac"
+        }
+      }
+    ]
+  }
+}
