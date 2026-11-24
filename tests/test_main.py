@@ -142,6 +142,36 @@ class MainRunTest(unittest.TestCase):
         run(date(2026, 7, 4), self.root, dry_run=False, fetch=fetch, notion=Boom())
         self.assertFalse((self.root / "data" / "2026-07-04.json").exists())
 
+    def test_missing_aliases_warns(self):
+        (self.root / "aliases.json").unlink()
+        r = run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertTrue(any(w.startswith("aliases.json couldn't be read") for w in r.warnings))
+        self.assertEqual(r.status, "Check data")
+
+    def test_invalid_aliases_json_warns(self):
+        for bad in ("{not json", "[1, 2]"):
+            (self.root / "aliases.json").write_text(bad)
+            r = run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+            self.assertTrue(any(w.startswith("aliases.json couldn't be read")
+                                for w in r.warnings), bad)
+
+    def test_offseason_non_final_games_still_publish(self):
+        class FakeNotion:
+            published = 0
+
+            def publish(self, report):
+                FakeNotion.published += 1
+                return "u"
+
+        fetch = make_fetch()
+        games = sources.parse_scoreboard(_load("scoreboard_men_2026-11-21.json"), "men")[:1]
+        games[0].state = "pre"
+        fetch.fetch_scoreboard = lambda g, d: games if g == "men" else []
+        r = run(date(2026, 7, 4), self.root, dry_run=False, fetch=fetch, notion=FakeNotion())
+        self.assertEqual(FakeNotion.published, 1)
+        self.assertTrue(any(w.startswith("Not final (men)") for w in r.warnings))
+        self.assertTrue((self.root / "data" / "2026-07-04.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

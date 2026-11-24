@@ -24,10 +24,13 @@ IN_SEASON_MONTHS = (11, 12, 1, 2, 3)
 FAR_FUTURE = date(9999, 12, 31)
 
 
-def _safe_aliases(root: Path) -> dict:
+def _safe_aliases(root: Path, warnings: list) -> dict:
     try:
         return load_aliases(root / "aliases.json")
-    except (OSError, ValueError):
+    except (OSError, ValueError, AttributeError, TypeError) as e:
+        reason = type(e).__name__
+        warnings.append(f"aliases.json couldn't be read ({reason}) — "
+                        "name matching may miss ranked teams.")
         return {"men": {}, "women": {}}
 
 
@@ -51,13 +54,14 @@ def _pick_poll(gender, day, root, fetched, warnings):
 def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         notion: Optional[NotionClient] = None) -> Report:
     root = Path(root)
-    aliases = _safe_aliases(root)
     warnings: list[str] = []
+    aliases = _safe_aliases(root, warnings)
     flags: dict[str, list] = {g: [] for g in GENDERS}
     final_counts = {g: 0 for g in GENDERS}
     polls_used: dict[str, str] = {}
     fatal = False
     scoreboards_down = 0
+    total_games = 0
     polls_missing = 0
 
     for gender in GENDERS:
@@ -107,6 +111,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
 
         if not games and day.month in IN_SEASON_MONTHS:
             warnings.append(f"No {low}'s games found for {day} — verify on ncaa.com.")
+        total_games += len(games)
         final_counts[gender] = sum(1 for g in games if g.is_final)
         for g in games:
             if not g.is_final:
@@ -137,7 +142,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         return report
 
     offseason_empty = (4 <= day.month <= 10 and not fatal
-                       and sum(final_counts.values()) == 0
+                       and total_games == 0
                        and scoreboards_down == 0)
     if offseason_empty:
         return report
