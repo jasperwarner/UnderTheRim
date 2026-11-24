@@ -6,11 +6,13 @@ import json
 import tempfile
 import types
 import unittest
+from unittest import mock
 from datetime import date
 from pathlib import Path
 
 from upsets import sources
 from upsets.http import FetchError
+from upsets import main as main_module
 from upsets.main import main, run
 from upsets.models import Game, PlayerLine, Poll, PollEntry, Team
 from upsets.notion import NotionError
@@ -531,6 +533,87 @@ class TwoDivisionRunTest(unittest.TestCase):
                       r.warnings)
 
 
+    def _flag_games_failing_for(self, division, exc):
+        real = main_module.flag_games
+
+        def fake(games, ranks, conferences, div):
+            if div == division:
+                raise exc
+            return real(games, ranks, conferences, div)
+        return mock.patch("upsets.main.flag_games", fake)
+
+    def test_d1_slot_crash_keeps_d2_flags(self):
+        with self._flag_games_failing_for("d1", RuntimeError("bad rank data\nmore")):
+            r = run(BOTH_DAY, self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertEqual(r.status, "Failed")
+        self.assertEqual(r.flags[("d1", "men")], [])
+        self.assertEqual(r.flags[("d1", "women")], [])
+        self.assertEqual(_flags(r, ("d2", "men")), D2_MEN_FLAGS)
+        self.assertEqual(_flags(r, ("d2", "women")), D2_WOMEN_FLAGS)
+        self.assertIn("Division I: Men couldn't be checked — unexpected error: "
+                      "RuntimeError: bad rank data. Other divisions' results are still shown.",
+                      r.warnings)
+        self.assertTrue(any(w.startswith("Division I: Women couldn't be checked")
+                            for w in r.warnings))
+        self.assertTrue(r.polls_used.startswith("D1: Men AP thru Nov 22 · Women AP"))
+
+    def test_d2_slot_crash_keeps_d1_flags(self):
+        n = FakeNotion()
+        with self._flag_games_failing_for("d2", ValueError("odd")):
+            r = run(BOTH_DAY, self.root, dry_run=False, fetch=make_fetch(), notion=n)
+        self.assertEqual(r.status, "Failed")
+        self.assertEqual(n.reports, [r])
+        self.assertEqual(len(r.flags[("d1", "men")]), 1)
+        self.assertEqual(len(r.flags[("d1", "women")]), 1)
+        self.assertEqual(r.flags[("d2", "men")], [])
+        self.assertTrue(any(w.startswith("Division II: Men couldn't be checked — "
+                                         "unexpected error: ValueError: odd")
+                            for w in r.warnings))
+        # The crashed slots add nothing to their roster; D1's still saves.
+        self.assertFalse((self.root / "data" / "teams.json").exists()
+                         and json.loads((self.root / "data" / "teams.json").read_text())
+                         ["men"])
+        d1 = json.loads((self.root / "data" / "teams_d1.json").read_text())
+        self.assertIn("little-u", d1["men"])
+
+    def test_slot_crash_in_scoreboard_fetch_is_contained(self):
+        fetch = make_fetch()
+        board = fetch.fetch_scoreboard
+
+        def scoreboard(gender, day, division="d2"):
+            if division == "d1" and gender == "women":
+                raise KeyError("games")
+            return board(gender, day, division)
+        fetch.fetch_scoreboard = scoreboard
+        r = run(BOTH_DAY, self.root, dry_run=True, fetch=fetch, notion=None)
+        self.assertTrue(r.fatal)
+        self.assertEqual(len(r.flags[("d1", "men")]), 1)
+        self.assertEqual(_flags(r, ("d2", "men")), D2_MEN_FLAGS)
+        self.assertIn("D1: Men AP thru Nov 22 · Women n/a | D2:", r.polls_used)
+
+    def test_keyboard_interrupt_in_slot_is_not_swallowed(self):
+        with self._flag_games_failing_for("d1", KeyboardInterrupt()):
+            with self.assertRaises(KeyboardInterrupt):
+                run(BOTH_DAY, self.root, dry_run=True, fetch=make_fetch(), notion=None)
+
+    def test_slot_crash_message_hides_secrets(self):
+        out, err = io.StringIO(), io.StringIO()
+        n = FakeNotion()
+        with self._flag_games_failing_for("d1", RuntimeError("tok secret_tok_123 db_456")), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            rc = main(["--date", BOTH_DAY.isoformat()], fetch=make_fetch(), root=self.root,
+                      notion_factory=lambda token, db: n, env=FAKE_ENV)
+        self.assertEqual(rc, 1)
+        r = n.reports[0]
+        self.assertEqual(_flags(r, ("d2", "men")), D2_MEN_FLAGS)
+        self.assertIn("Division I: Men couldn't be checked — unexpected error: "
+                      "RuntimeError: tok *** ***. Other divisions' results are still shown.",
+                      r.warnings)
+        text = out.getvalue() + err.getvalue() + "\n".join(r.warnings)
+        self.assertNotIn("secret_tok_123", text)
+        self.assertNotIn("db_456", text)
+
+
 class MainEntryTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -559,13 +642,14 @@ class MainEntryTest(unittest.TestCase):
         self.assertEqual(n.reports[0].status, "Failed")
 
     def test_unexpected_crash_returns_1_and_publishes(self):
+        # A crash outside any one division's checks (here: loading the rosters).
         fetch = make_fetch()
 
-        def boom(gender, day, division="d2"):
+        def boom(*args, **kwargs):
             raise RuntimeError("kaboom secret_tok_123 here\nsecond line")
-        fetch.fetch_scoreboard = boom
         n = FakeNotion()
-        self.assertEqual(self._main(fetch, n), 1)
+        with mock.patch("upsets.main.load_roster", boom):
+            self.assertEqual(self._main(fetch, n), 1)
         self.assertEqual(len(n.reports), 1)
         r = n.reports[0]
         self.assertEqual(r.status, "Failed")
@@ -577,9 +661,9 @@ class MainEntryTest(unittest.TestCase):
 
     def test_crash_with_notion_down_still_returns_1(self):
         fetch = make_fetch()
-        fetch.fetch_scoreboard = lambda g, d, division="d2": 1 / 0
         n = FakeNotion(fail=NotionError("Notion 503: down"))
-        self.assertEqual(self._main(fetch, n), 1)
+        with mock.patch("upsets.main.load_roster", lambda *a, **k: 1 / 0):
+            self.assertEqual(self._main(fetch, n), 1)
         self.assertIn("Program crashed: ZeroDivisionError", self.out.getvalue())
 
     def test_notion_failure_returns_1_after_printing(self):

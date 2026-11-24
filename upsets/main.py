@@ -80,8 +80,10 @@ def _rate(flag, records, players, warnings) -> None:
 
 
 def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
-        notion: Optional[NotionClient] = None, divisions=DIVISIONS) -> Report:
+        notion: Optional[NotionClient] = None, divisions=DIVISIONS,
+        secrets: Optional[list] = None) -> Report:
     root = Path(root)
+    secrets = list(secrets or [])
     divisions = tuple(d for d in DIVISIONS if d in divisions)  # D1 first, then D2
     if not divisions:
         raise ValueError("run needs at least one division")
@@ -98,6 +100,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     scoreboards_down = 0
     total_games = 0
     polls_missing = 0
+    failed: set = set()  # slots that crashed part-way: their teams stay off the roster
 
     for division in divisions:
         title = DIVISION_TITLES[division]
@@ -107,84 +110,93 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         roster = rosters[division]
         for gender in GENDERS:
             key = (division, gender)
-            cap, low = gender.capitalize(), gender
-            poss = "Men's" if gender == "men" else "Women's"
             try:
-                games = fetch.fetch_scoreboard(gender, day, division)
-            except (FetchError, ParseError):
-                fatal = True
-                scoreboards_down += 1
-                warnings.append(f"{pre}{cap} scoreboard couldn't be fetched.")
-                polls_used[key] = f"{cap} n/a"
-                continue
-
-            fetched: Optional[Poll] = None
-            save_warning = None
-            try:
-                fetched = fetch.fetch_poll(gender, division)
-            except (FetchError, ParseError):
-                fetched = None
-            if fetched is not None and not dry_run:
+                cap, low = gender.capitalize(), gender
+                poss = "Men's" if gender == "men" else "Women's"
                 try:
-                    save_poll(fetched, root)
-                except OSError:
-                    save_warning = f"{pre}{cap} poll couldn't be saved."
-
-            poll = _pick_poll(gender, day, root, fetched, warnings, division, pre)
-            if poll is None:
-                polls_missing += 1
-                warnings.append(f"{pre}{poss} poll couldn't be read today — "
-                                f"{low}'s ranked rules skipped.")
-                polls_used[key] = f"{cap} none"
-            else:
-                if fetched is None:
-                    warnings.append(f"{pre}{poss} poll couldn't be refreshed today — "
-                                    "using the saved poll.")
-                saved_newest = poll_for(gender, FAR_FUTURE, root, division=division)
-                newest = max([p.as_of for p in (saved_newest, fetched) if p is not None])
-                label = f"{cap} {poll.label}"
-                if day.month == 3 and poll.as_of == newest:
-                    label += " (final poll)"
-                polls_used[key] = label
-                season_end = date(day.year if day.month < 7 else day.year + 1, 3, 1)
-                age = (day - poll.as_of).days
-                if day < season_end and age > 9:
-                    warnings.append(f"{pre}{cap} poll is {age} days old.")
-            if save_warning:
-                warnings.append(save_warning)
-
-            if not games and day.month in IN_SEASON_MONTHS:
-                warnings.append(f"{pre}No {low}'s games found for {day} — verify on ncaa.com.")
-            total_games += len(games)
-            all_games[key] = games
-            final_counts[key] = sum(1 for g in games if g.is_final)
-            for g in games:
-                if not g.is_final:
-                    warnings.append(f"Not final ({tag} {low}): {g.away.name} at {g.home.name}"
-                                    f" — {g.state or 'unknown'}.")
-
-            ranks: dict[str, int] = {}
-            records: dict[str, str] = {}
-            if poll is not None:
-                ranks, name_warnings = build_rank_map(poll, games, aliases[gender],
-                                                      aliases["not_same"][gender],
-                                                      known=roster[gender], records=records)
-                warnings.extend(pre + w for w in name_warnings)
-            gender_flags = flag_games(games, ranks, conferences[division], division)
-            for flag in gender_flags:
-                try:
-                    players = fetch.fetch_boxscore(flag.game.game_id)
-                    add_big_scorers(flag, players)
-                    complete = boxscore_complete(flag.game, players)
-                except Exception:  # box scores are optional: never let one stop the run
-                    warnings.append(f"No box score for {flag.headline}.")
-                    _rate(flag, records, [], warnings)
+                    games = fetch.fetch_scoreboard(gender, day, division)
+                except (FetchError, ParseError):
+                    fatal = True
+                    scoreboards_down += 1
+                    warnings.append(f"{pre}{cap} scoreboard couldn't be fetched.")
+                    polls_used[key] = f"{cap} n/a"
                     continue
-                if not complete:
-                    warnings.append(f"Box score incomplete for {flag.headline} "
-                                    f"({flag.game.link}) — 35+ check may have missed someone")
-                _rate(flag, records, players, warnings)
-            flags[key] = gender_flags
+
+                fetched: Optional[Poll] = None
+                save_warning = None
+                try:
+                    fetched = fetch.fetch_poll(gender, division)
+                except (FetchError, ParseError):
+                    fetched = None
+                if fetched is not None and not dry_run:
+                    try:
+                        save_poll(fetched, root)
+                    except OSError:
+                        save_warning = f"{pre}{cap} poll couldn't be saved."
+
+                poll = _pick_poll(gender, day, root, fetched, warnings, division, pre)
+                if poll is None:
+                    polls_missing += 1
+                    warnings.append(f"{pre}{poss} poll couldn't be read today — "
+                                    f"{low}'s ranked rules skipped.")
+                    polls_used[key] = f"{cap} none"
+                else:
+                    if fetched is None:
+                        warnings.append(f"{pre}{poss} poll couldn't be refreshed today — "
+                                        "using the saved poll.")
+                    saved_newest = poll_for(gender, FAR_FUTURE, root, division=division)
+                    newest = max([p.as_of for p in (saved_newest, fetched) if p is not None])
+                    label = f"{cap} {poll.label}"
+                    if day.month == 3 and poll.as_of == newest:
+                        label += " (final poll)"
+                    polls_used[key] = label
+                    season_end = date(day.year if day.month < 7 else day.year + 1, 3, 1)
+                    age = (day - poll.as_of).days
+                    if day < season_end and age > 9:
+                        warnings.append(f"{pre}{cap} poll is {age} days old.")
+                if save_warning:
+                    warnings.append(save_warning)
+
+                if not games and day.month in IN_SEASON_MONTHS:
+                    warnings.append(f"{pre}No {low}'s games found for {day} — verify on ncaa.com.")
+                total_games += len(games)
+                all_games[key] = games
+                final_counts[key] = sum(1 for g in games if g.is_final)
+                for g in games:
+                    if not g.is_final:
+                        warnings.append(f"Not final ({tag} {low}): {g.away.name} at {g.home.name}"
+                                        f" — {g.state or 'unknown'}.")
+
+                ranks: dict[str, int] = {}
+                records: dict[str, str] = {}
+                if poll is not None:
+                    ranks, name_warnings = build_rank_map(poll, games, aliases[gender],
+                                                          aliases["not_same"][gender],
+                                                          known=roster[gender], records=records)
+                    warnings.extend(pre + w for w in name_warnings)
+                gender_flags = flag_games(games, ranks, conferences[division], division)
+                for flag in gender_flags:
+                    try:
+                        players = fetch.fetch_boxscore(flag.game.game_id)
+                        add_big_scorers(flag, players)
+                        complete = boxscore_complete(flag.game, players)
+                    except Exception:  # box scores are optional: never let one stop the run
+                        warnings.append(f"No box score for {flag.headline}.")
+                        _rate(flag, records, [], warnings)
+                        continue
+                    if not complete:
+                        warnings.append(f"Box score incomplete for {flag.headline} "
+                                        f"({flag.game.link}) — 35+ check may have missed someone")
+                    _rate(flag, records, players, warnings)
+                flags[key] = gender_flags
+            except Exception as e:  # one slot failing must not blank the other slots
+                fatal = True
+                failed.add(key)
+                flags[key] = []
+                polls_used.setdefault(key, f"{gender.capitalize()} n/a")
+                warnings.append(f"{DIVISION_TITLES[division]}: {gender.capitalize()} couldn't be "
+                                f"checked — unexpected error: {_error_text(e, secrets)}. "
+                                "Other divisions' results are still shown.")
 
     if polls_missing == len(keys):
         fatal = True
@@ -210,7 +222,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         roster = rosters[division]
         try:  # remember today's teams, so a ranked team that is off tomorrow is recognized
             for gender in GENDERS:
-                add_games(roster, gender, all_games[(division, gender)])
+                if (division, gender) not in failed:
+                    add_games(roster, gender, all_games[(division, gender)])
             save_roster(roster, root, division=division)
         except OSError as e:
             print(f"Warning: could not save data/{roster_path(root, division).name}: "
@@ -227,14 +240,19 @@ def _yesterday_eastern() -> date:
     return (datetime.datetime.now(ZoneInfo("America/New_York")) - datetime.timedelta(days=1)).date()
 
 
-def _crash_message(e: BaseException, secrets: list) -> str:
+def _error_text(e: BaseException, secrets: list) -> str:
+    """'ExcName: first line of the message', with secrets masked and length capped."""
     detail = str(e).splitlines()[0] if str(e) else ""
     for value in secrets:
         if value:
             detail = detail.replace(value, "***")
     if len(detail) > 200:
         detail = detail[:200] + "…"
-    return f"Program crashed: {type(e).__name__}: {detail}"
+    return f"{type(e).__name__}: {detail}"
+
+
+def _crash_message(e: BaseException, secrets: list) -> str:
+    return f"Program crashed: {_error_text(e, secrets)}"
 
 
 def _report_crash(e: BaseException, day: date, notion, secrets: list) -> int:
@@ -279,7 +297,8 @@ def main(argv: Optional[list] = None, *, fetch=sources, root: Optional[Path] = N
         day = args.date or _yesterday_eastern()
         if not args.dry_run:
             notion = notion_factory(token, database_id)
-        report = run(day, root, dry_run=args.dry_run, fetch=fetch, notion=notion)
+        report = run(day, root, dry_run=args.dry_run, fetch=fetch, notion=notion,
+                     secrets=secrets)
     except NotionError as e:
         # The report was already printed above; only the Notion upload failed.
         print(f"Error: could not publish to Notion: {e}", file=sys.stderr)
