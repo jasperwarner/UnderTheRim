@@ -5,6 +5,9 @@ on:
     # 11:17 UTC = about 6:17 AM Eastern in winter, 7:17 AM from March 8 (daylight time).
     # GitHub can start scheduled runs a few minutes late.
     - cron: "17 11 * * *"
+    # Backup run two hours later in case GitHub skips the first one.
+    # It does the same job and replaces the day's Notion page, so a double run is harmless.
+    - cron: "17 13 * * *"
   workflow_dispatch:
     inputs:
       date:
