@@ -1,0 +1,109 @@
+{
+  "gender": "women",
+  "title": "WBCA Coaches",
+  "as_of": "2026-11-16",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Grand Valley State"
+    },
+    {
+      "rank": 2,
+      "name": "Colorado Mesa"
+    },
+    {
+      "rank": 3,
+      "name": "Indiana, PA"
+    },
+    {
+      "rank": 4,
+      "name": "Cal Poly Pomona"
+    },
+    {
+      "rank": 5,
+      "name": "Lenoir-Rhyne"
+    },
+    {
+      "rank": 6,
+      "name": "Gannon"
+    },
+    {
+      "rank": 7,
+      "name": "Winston-Salem State"
+    },
+    {
+      "rank": 8,
+      "name": "Carson-Newman"
+    },
+    {
+      "rank": 9,
+      "name": "Bentley"
+    },
+    {
+      "rank": 10,
+      "name": "Alabama-Huntsville"
+    },
+    {
+      "rank": 11,
+      "name": "Holy Family"
+    },
+    {
+      "rank": 12,
+      "name": "Texas Woman’s"
+    },
+    {
+      "rank": 13,
+      "name": "Ashland"
+    },
+    {
+      "rank": 14,
+      "name": "Tampa"
+    },
+    {
+      "rank": 15,
+      "name": "Minnesota Duluth"
+    },
+    {
+      "rank": 16,
+      "name": "Concordia-St. Paul"
+    },
+    {
+      "rank": 17,
+      "name": "Columbus State"
+    },
+    {
+      "rank": 18,
+      "name": "Western Washington"
+    },
+    {
+      "rank": 19,
+      "name": "Fort Hays State"
+    },
+    {
+      "rank": 20,
+      "name": "Northwood"
+    },
+    {
+      "rank": 21,
+      "name": "Embry-Riddle"
+    },
+    {
+      "rank": 22,
+      "name": "Fairmont State"
+    },
+    {
+      "rank": 23,
+      "name": "Lubbock Christian"
+    },
+    {
+      "rank": 24,
+      "name": "Central Washington"
+    },
+    {
+      "rank": 25,
+      "name": "West Texas A&M"
+    }
+  ],
+  "source": "https://wbca.org/polls-ncaa-division-ii-coaches/",
+  "label": "WBCA Nov 17"
+}

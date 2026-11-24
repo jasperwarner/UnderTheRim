@@ -1,0 +1,343 @@
+{
+  "day": "2026-11-22",
+  "status": "OK",
+  "flag_count": 1,
+  "polls_used": "Men NABC thru Nov 15 · Women WBCA Nov 17",
+  "warnings": [],
+  "final_counts": {
+    "men": 4,
+    "women": 14
+  },
+  "fatal": false,
+  "flags": [
+    {
+      "gender": "women",
+      "game_id": "6656542",
+      "headline": "Unranked Wingate beat No. 17 Columbus St., 84-73",
+      "tags": [
+        "Upset"
+      ],
+      "link": "https://www.ncaa.com/game/6656542",
+      "home": {
+        "seo": "wingate",
+        "score": 84
+      },
+      "away": {
+        "seo": "columbus-st",
+        "score": 73
+      }
+    }
+  ],
+  "games": {
+    "men": [
+      {
+        "id": "6678681",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "uva-wise",
+          "name": "UVA Wise",
+          "score": 124,
+          "conferenceSeo": "sac"
+        },
+        "away": {
+          "seo": "virginia-lynchburg",
+          "name": "Virginia-Lynchburg",
+          "score": 63,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6677046",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "neb-kearney",
+          "name": "Neb.-Kearney",
+          "score": 78,
+          "conferenceSeo": "mid-america-intercollegiate"
+        },
+        "away": {
+          "seo": "regis-co",
+          "name": "Regis (CO)",
+          "score": 69,
+          "conferenceSeo": "rmac"
+        }
+      },
+      {
+        "id": "6665386",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "cal-st-la",
+          "name": "Cal State LA",
+          "score": 70,
+          "conferenceSeo": "ccaa"
+        },
+        "away": {
+          "seo": "hawaii-pacific",
+          "name": "Hawaii Pacific",
+          "score": 80,
+          "conferenceSeo": "pacwest"
+        }
+      },
+      {
+        "id": "6653468",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "st-marys-ca",
+          "name": "Saint Mary's (CA)",
+          "score": 94,
+          "conferenceSeo": "wcc"
+        },
+        "away": {
+          "seo": "menlo",
+          "name": "Menlo",
+          "score": 78,
+          "conferenceSeo": "ccaa"
+        }
+      }
+    ],
+    "women": [
+      {
+        "id": "6657783",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "st-anselm",
+          "name": "Saint Anselm",
+          "score": 82,
+          "conferenceSeo": "ne10"
+        },
+        "away": {
+          "seo": "molloy",
+          "name": "Molloy",
+          "score": 55,
+          "conferenceSeo": "ecc"
+        }
+      },
+      {
+        "id": "6659602",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "pr-mayaguez",
+          "name": "P.R.-Mayaguez",
+          "score": 38,
+          "conferenceSeo": "dii-independent"
+        },
+        "away": {
+          "seo": "upper-iowa",
+          "name": "Upper Iowa",
+          "score": 53,
+          "conferenceSeo": "glvc"
+        }
+      },
+      {
+        "id": "6658481",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "holy-family",
+          "name": "Holy Family",
+          "score": 61,
+          "conferenceSeo": "cacc"
+        },
+        "away": {
+          "seo": "bentley",
+          "name": "Bentley",
+          "score": 42,
+          "conferenceSeo": "ne10"
+        }
+      },
+      {
+        "id": "6656542",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "wingate",
+          "name": "Wingate",
+          "score": 84,
+          "conferenceSeo": "sac"
+        },
+        "away": {
+          "seo": "columbus-st",
+          "name": "Columbus St.",
+          "score": 73,
+          "conferenceSeo": "peach-belt"
+        }
+      },
+      {
+        "id": "6645681",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "liberty",
+          "name": "Liberty",
+          "score": 94,
+          "conferenceSeo": "cusa"
+        },
+        "away": {
+          "seo": "lees-mcrae",
+          "name": "Lees-McRae",
+          "score": 43,
+          "conferenceSeo": "conference-carolinas"
+        }
+      },
+      {
+        "id": "6659496",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "queens-ny",
+          "name": "Queens (NY)",
+          "score": 57,
+          "conferenceSeo": "ecc"
+        },
+        "away": {
+          "seo": "franklin-pierce",
+          "name": "Franklin Pierce",
+          "score": 51,
+          "conferenceSeo": "ne10"
+        }
+      },
+      {
+        "id": "6660114",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "cal-st-monterey-bay",
+          "name": "Cal St. Monterey Bay",
+          "score": 52,
+          "conferenceSeo": "ccaa"
+        },
+        "away": {
+          "seo": "simon-fraser",
+          "name": "Simon Fraser",
+          "score": 64,
+          "conferenceSeo": "great-northwest"
+        }
+      },
+      {
+        "id": "6658377",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "colorado-st-pueblo",
+          "name": "CSU Pueblo",
+          "score": 89,
+          "conferenceSeo": "rmac"
+        },
+        "away": {
+          "seo": "chadron-st",
+          "name": "Chadron St.",
+          "score": 70,
+          "conferenceSeo": "rmac"
+        }
+      },
+      {
+        "id": "6659074",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "western-wash",
+          "name": "Western Wash.",
+          "score": 86,
+          "conferenceSeo": "great-northwest"
+        },
+        "away": {
+          "seo": "cal-st-east-bay",
+          "name": "Cal St. East Bay",
+          "score": 59,
+          "conferenceSeo": "ccaa"
+        }
+      },
+      {
+        "id": "6659150",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "uc-colo-springs",
+          "name": "UCCS",
+          "score": 54,
+          "conferenceSeo": "rmac"
+        },
+        "away": {
+          "seo": "neb-kearney",
+          "name": "Neb.-Kearney",
+          "score": 61,
+          "conferenceSeo": "mid-america-intercollegiate"
+        }
+      },
+      {
+        "id": "6659367",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "loyola-la",
+          "name": "Loyola (LA)",
+          "score": 79,
+          "conferenceSeo": ""
+        },
+        "away": {
+          "seo": "west-ala",
+          "name": "West Ala.",
+          "score": 64,
+          "conferenceSeo": "gulf-south"
+        }
+      },
+      {
+        "id": "6659737",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "alas-fairbanks",
+          "name": "Alas. Fairbanks",
+          "score": 96,
+          "conferenceSeo": "great-northwest"
+        },
+        "away": {
+          "seo": "northwest-wa",
+          "name": "Northwest (WA)",
+          "score": 103,
+          "conferenceSeo": ""
+        }
+      },
+      {
+        "id": "6657015",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "st-marys-tx",
+          "name": "St. Mary's (TX)",
+          "score": 72,
+          "conferenceSeo": "lone-star"
+        },
+        "away": {
+          "seo": "western-st",
+          "name": "Western Colo.",
+          "score": 48,
+          "conferenceSeo": "rmac"
+        }
+      },
+      {
+        "id": "6679253",
+        "gameState": "final",
+        "currentPeriod": "FINAL",
+        "home": {
+          "seo": "alas-anchorage",
+          "name": "Alas. Anchorage",
+          "score": 85,
+          "conferenceSeo": "great-northwest"
+        },
+        "away": {
+          "seo": "chicago-st",
+          "name": "Chicago St.",
+          "score": 65,
+          "conferenceSeo": "nec"
+        }
+      }
+    ]
+  }
+}

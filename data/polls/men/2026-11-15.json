@@ -1,0 +1,109 @@
+{
+  "gender": "men",
+  "title": "NABC Coaches",
+  "as_of": "2026-11-15",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Gannon"
+    },
+    {
+      "rank": 2,
+      "name": "Cal State East Bay"
+    },
+    {
+      "rank": 3,
+      "name": "DBU"
+    },
+    {
+      "rank": 4,
+      "name": "Washburn"
+    },
+    {
+      "rank": 5,
+      "name": "Nova Southeastern"
+    },
+    {
+      "rank": 6,
+      "name": "West Alabama"
+    },
+    {
+      "rank": 7,
+      "name": "West Liberty"
+    },
+    {
+      "rank": 8,
+      "name": "Black Hills State"
+    },
+    {
+      "rank": 9,
+      "name": "Alabama Huntsville"
+    },
+    {
+      "rank": 10,
+      "name": "Walsh"
+    },
+    {
+      "rank": 11,
+      "name": "Eastern New Mexico"
+    },
+    {
+      "rank": 12,
+      "name": "Oklahoma Baptist"
+    },
+    {
+      "rank": 13,
+      "name": "Saint Martin's"
+    },
+    {
+      "rank": 14,
+      "name": "Fairmont State"
+    },
+    {
+      "rank": 15,
+      "name": "Minnesota State"
+    },
+    {
+      "rank": 16,
+      "name": "Missouri Western"
+    },
+    {
+      "rank": 17,
+      "name": "Lenoir-Rhyne"
+    },
+    {
+      "rank": 18,
+      "name": "Saint Michael's"
+    },
+    {
+      "rank": 19,
+      "name": "Michigan Tech"
+    },
+    {
+      "rank": 20,
+      "name": "Lake Superior State"
+    },
+    {
+      "rank": 21,
+      "name": "Florida Southern"
+    },
+    {
+      "rank": 22,
+      "name": "West Texas A&M"
+    },
+    {
+      "rank": 23,
+      "name": "Columbus State"
+    },
+    {
+      "rank": 24,
+      "name": "Point Loma"
+    },
+    {
+      "rank": 25,
+      "name": "Lincoln Memorial"
+    }
+  ],
+  "source": "https://ncaa-api.henrygd.me/rankings/basketball-men/d2/nabc-coaches",
+  "label": "NABC thru Nov 15"
+}
