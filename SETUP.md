@@ -17,6 +17,8 @@ You will need: your GitHub account and your Notion account.
 5. Click the green **Create repository** button.
 6. You will land on a page with setup instructions. You don't need to do anything there. Tell Claude the repository is created, and Claude will upload the code for you.
 
+**Good to know:** GitHub only runs the daily schedule, and only shows the "Run workflow" button, when the code is on the branch called `main`. If you ever can't find the button, or the morning pages stop and nothing is red, ask Claude: "Is the code on the main branch on GitHub?"
+
 ## Step 2. Create the Notion "robot account" (an integration)
 
 1. Go to https://www.notion.so/profile/integrations and sign in if asked.
@@ -82,27 +84,46 @@ Do this after Claude has uploaded the code.
 4. In the "Date to check" box, type: `2026-11-21`
 5. Click the green **Run workflow** button in the box.
 6. Wait about a minute. Refresh the page. A new line appears with a spinning yellow circle. When it finishes, it turns into a **green check mark**.
-7. Open your Notion database. You should see a new page called **D2 Upsets — Nov 21, 2026** with about **11 flags**.
+7. Open your Notion database. You should see a new page called **D2 Upsets — Nov 21, 2026** with about **11 flags** and the Status **Check data**.
 
-That matches the saved test run in `docs/test-runs/2026-11-21.txt`. The numbers can differ a little if the polls have been updated since.
+"Check data" is expected for this date. The warnings at the top will say that one game (Selma at AUM) is listed as not final, and probably that a box score or two looked incomplete. That is the real data for that day, not a problem with your setup.
+
+This matches the saved test run in `docs/test-runs/2026-11-21.txt`. The number of flags may be a little different if a newer weekly poll has come out since: on its very first run the program has no older poll saved yet, so it uses the newest poll, which can change which teams count as ranked (it will also add a warning saying so).
 
 If the line turns red, click it to see what went wrong, and show Claude what you see (no secrets in it).
+
+## Step 7. Make sure GitHub emails you when something breaks
+
+That email is your backup alarm, so check it is switched on.
+
+1. On GitHub, click your profile picture (top right), then **Settings**.
+2. In the left column, click **Notifications**.
+3. Scroll down to the **System** section and find **Actions**.
+4. Make sure **Email** is ticked, and tick **Only notify for failed workflows**.
 
 ---
 
 ## What every morning looks like
 
-Between about 6:00 and 6:30 AM Eastern, a new page appears in your database for the previous day's games. The Status column tells you how much to trust it:
+At about 6–7 AM Eastern, a new page appears in your database for the previous day's games. The Status column tells you how much to trust it:
 
 - **OK**: everything worked. The list is complete.
-- **Check data**: the page was written, but something was a little off. A warning at the top of the page says what. Examples: a game wasn't final yet, or a team's name in the poll didn't match the scoreboard. The flags are probably still right.
+- **Check data**: the page was written, but something was a little off. A warning at the top of the page says what. Examples: a game wasn't final yet, a team's name in the poll didn't match the scoreboard, or a box score looked incomplete (so a 35-point game might have been missed). The flags are probably still right.
 - **Failed**: the program could not do its job that day. Nothing reliable on the page. GitHub will also email you.
 
-**If no page shows up by about 7 AM, treat that as broken**, even if you got no email. Tell Claude.
+(Before March 8 it's usually a little after 6 AM; from March 8, when the clocks change, a little after 7 AM. GitHub sometimes starts a few minutes late.)
+
+**If no page shows up by about 9 AM Eastern, treat that as broken**, even if you got no email. Tell Claude.
 
 ### Fixing a "possible name mismatch" warning
 
-Sometimes a team is spelled differently in the poll and on the scoreboard, so the program can't tell they are the same team. The warning names both spellings. To fix it, tell Claude: "Add an alias for the name mismatch warning from [date]." Claude will add it to `aliases.json` and upload it. It stays fixed from then on.
+Sometimes a team is spelled differently in the poll and on the scoreboard, so the program can't tell whether they are the same team. The warning names both spellings. Sometimes they really are two different schools that just have similar names (for example "Grand Valley State" and "Fort Valley St.").
+
+1. First check whether the two names are the same school. A quick web search of both names usually settles it.
+2. **Same school:** tell Claude: "Add an alias for the name mismatch warning from [date]." Claude will add it to `aliases.json` and upload it.
+3. **Different schools:** tell Claude: "These are different schools — add them to not_same for the warning from [date]." That stops the warning for that pair.
+
+Either way, it stays fixed from then on.
 
 ### If the daily run stops (the off-season)
 
