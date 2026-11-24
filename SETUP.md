@@ -92,6 +92,8 @@ Do this after Claude has uploaded the code.
 
 This matches the saved test runs in `docs/test-runs/2026-11-21.txt` (Division II only, from before Division I was added) and `docs/test-runs/2026-11-21-d1.txt` (both divisions). The number of flags may be a little different if a newer weekly poll has come out since: on its very first run the program has no older poll saved yet, so it uses the newest poll, which can change which teams count as ranked (it will also add a warning saying so).
 
+Please do not treat the Division I results for Nov 21 and Nov 22 in `docs/test-runs/` as the right answer. At that time the program only had the Nov 22 poll, so those results are not ground truth. For example, they miss Villanova beating No. 18 Michigan on Nov 21, and they show Nebraska as No. 21 on Nov 22 when it was No. 24.
+
 If the line turns red, click it to see what went wrong, and show Claude what you see (no secrets in it).
 
 ## Step 7. Make sure GitHub emails you when something breaks
@@ -133,7 +135,7 @@ The labels are only guides. They never hide anything: every flag still shows up 
 
 Division I and Division II results share one Notion page for each day, in two separate sections (Division I first, then Division II). Each section has its own men's and women's lists. The line at the bottom of the page tells you which poll was used for each division. Ranks are matched only against the right division's poll, so a Division I team is never compared with a Division II poll.
 
-For Division I the ranks come from the AP Top 25 poll (AP stands for Associated Press, the news agency). Because the program only started saving Division I polls recently, a day from before that can only be checked against the newest poll. When that happens the page says so in a warning ("ranks are from a poll released after this game"), and you should trust that day's Division I flags less. From now on, the program saves each new poll in `data/polls/d1/` as it goes, so new days are checked against the poll that was really in force.
+For Division I the ranks come from the AP Top 25 poll (AP stands for Associated Press, the news agency). On a first run the program has no saved Division I poll yet, so a day from before that can only be checked against the newest poll. When that happens the page says so in a warning ("ranks are from a poll released after this game"), and you should trust that day's Division I flags less. From now on, the program saves each new poll in `data/polls/d1/` as it goes, so new days are checked against the poll that was really in force.
 
 ### The files the program keeps
 
