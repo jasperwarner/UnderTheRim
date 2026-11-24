@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from upsets.models import Flag, Game, PlayerLine, Team
-from upsets.rules import add_big_scorers, flag_games
+from upsets.rules import add_big_scorers, boxscore_complete, flag_games
 
 
 def g(home_seo, hs, away_seo, as_, period="FINAL", state="final", conf="gsc",
@@ -32,6 +32,10 @@ class FlagGamesTest(unittest.TestCase):
         self.assertEqual(flags[0].tags, ["Close (2 pts)", "Overtime"])
         self.assertEqual(flags[0].headline, "No. 5 a beat b, 70-68")
 
+    def test_one_point_singular(self):
+        flags = flag_games([g("a", 88, "b", 87)], {"a": 7})
+        self.assertEqual(flags[0].tags, ["Close (1 pt)"])
+
     def test_unranked_close_not_flagged(self):
         self.assertEqual(flag_games([g("a", 60, "b", 59)], {}), [])
 
@@ -48,6 +52,33 @@ class FlagGamesTest(unittest.TestCase):
         self.assertEqual(flags[0].tags[-1], "Non-D2 opponent")
         self.assertEqual(flags[0].tags, ["Upset", "Non-D2 opponent"])
 
+    def test_non_d2_by_conference_list(self):
+        d2 = {"gsc", "sac"}
+        game = g("a", 70, "b", 60, home_conf="asun", away_conf="sac")
+        flags = flag_games([game], {"b": 3}, d2)
+        self.assertEqual(flags[0].tags, ["Upset", "Non-D2 opponent"])
+        flags = flag_games([g("a", 70, "b", 60, away_conf="sac")], {"b": 3}, d2)
+        self.assertEqual(flags[0].tags, ["Upset"])
+        flags = flag_games([g("a", 70, "b", 60, home_conf="")], {"b": 3}, d2)
+        self.assertEqual(flags[0].tags, ["Upset", "Non-D2 opponent"])
+
+    def test_without_list_only_blank_is_non_d2(self):
+        game = g("a", 70, "b", 60, home_conf="asun")
+        self.assertEqual(flag_games([game], {"b": 3})[0].tags, ["Upset"])
+
+    def test_real_conference_file(self):
+        import json
+        from pathlib import Path
+        d2 = set(json.loads((Path(__file__).resolve().parent.parent
+                             / "d2_conferences.json").read_text()))
+        for non in ("acc", "asun", "america-east", "saa", "sciac", "diii-independent",
+                    "nwc", "usa-south", "umac", ""):
+            self.assertNotIn(non, d2)
+        for yes in ("psac", "gliac", "gac", "dii-independent", "sac", "siac"):
+            self.assertIn(yes, d2)
+        game = g("queens-nc", 70, "b", 60, home_conf="asun", away_conf="sac")
+        self.assertIn("Non-D2 opponent", flag_games([game], {"b": 3}, d2)[0].tags)
+
     def test_non_d2_alone_not_flagged(self):
         self.assertEqual(flag_games([g("a", 70, "b", 60, home_conf="")], {}), [])
 
@@ -55,6 +86,23 @@ class FlagGamesTest(unittest.TestCase):
         games = [g("a", 71, "b", 68), g("c", 50, "d", 40), g("e", 80, "f", 70)]
         flags = flag_games(games, {"b": 7, "f": 2})
         self.assertEqual([f.game for f in flags], [games[0], games[2]])
+
+
+class BoxscoreCompleteTest(unittest.TestCase):
+    def test_complete(self):
+        game = g("a", 71, "b", 68)
+        self.assertTrue(boxscore_complete(game, [PlayerLine("x", "a", 70), PlayerLine("y", "a", 1),
+                                                 PlayerLine("z", "b", 68)]))
+
+    def test_sum_short(self):
+        game = g("a", 71, "b", 68)
+        self.assertFalse(boxscore_complete(game, [PlayerLine("x", "a", 44),
+                                                  PlayerLine("z", "b", 68)]))
+
+    def test_team_missing(self):
+        game = g("a", 71, "b", 68)
+        self.assertFalse(boxscore_complete(game, [PlayerLine("x", "a", 71)]))
+        self.assertFalse(boxscore_complete(game, []))
 
 
 class BigScorerTest(unittest.TestCase):

@@ -66,7 +66,7 @@ class ReportTest(unittest.TestCase):
         r = make_report({"men": [make_flag()], "women": []}, warnings=["w"])
         d = json.loads(json.dumps(to_json(r)))
         for k in ("status", "flags", "warnings", "final_counts", "day",
-                  "flag_count", "polls_used", "fatal"):
+                  "flag_count", "polls_used", "fatal", "games"):
             self.assertIn(k, d)
         self.assertEqual(d["day"], "2026-11-22")
         self.assertEqual(d["flag_count"], 1)
@@ -80,6 +80,19 @@ class ReportTest(unittest.TestCase):
         t = to_text(make_report({"men": [make_flag()], "women": []}, warnings=["w1"]))
         self.assertIn("- Upset · Close (3 pts) — Unranked A beat No. 7 B, 71-68  https://www.ncaa.com/game/1", t)
         self.assertLess(t.index("w1"), t.index("Men's"))
+        self.assertIn("\nPolls used: saved 2026-11-17", t)
+
+    def test_json_has_games_per_gender(self):
+        f = make_flag()
+        r = make_report({"men": [f], "women": []})
+        r.games = {"men": [f.game], "women": []}
+        d = json.loads(json.dumps(to_json(r)))
+        self.assertEqual(d["games"]["women"], [])
+        self.assertEqual(d["games"]["men"], [{
+            "id": "1", "gameState": "final", "currentPeriod": "FINAL",
+            "home": {"seo": "a", "name": "A", "score": 71, "conferenceSeo": "gsc"},
+            "away": {"seo": "b", "name": "B", "score": 68, "conferenceSeo": "gsc"},
+        }])
 
 
 if __name__ == "__main__":

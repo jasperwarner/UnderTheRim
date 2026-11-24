@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
-from upsets.models import Flag
+from upsets.models import Flag, Game, Team
 
 GENDERS = (("men", "Men's"), ("women", "Women's"))
 
@@ -17,6 +17,7 @@ class Report:
     final_counts: dict[str, int]
     polls_used: str
     fatal: bool = False
+    games: dict[str, list[Game]] = field(default_factory=dict)
 
     @property
     def status(self) -> str:
@@ -57,8 +58,22 @@ def to_text(r: Report) -> str:
             lines.append("No flags.")
         for f in flags:
             lines.append(f"- {' · '.join(f.tags)} — {f.headline}  {f.game.link}")
-    lines += ["", _footer(r)]
+    lines += ["", _footer(r), f"Polls used: {r.polls_used}"]
     return "\n".join(lines)
+
+
+def _team_json(t: Team) -> dict[str, Any]:
+    return {"seo": t.seo, "name": t.name, "score": t.score, "conferenceSeo": t.conference}
+
+
+def _game_json(g: Game) -> dict[str, Any]:
+    return {
+        "id": g.game_id,
+        "gameState": g.state,
+        "currentPeriod": g.period,
+        "home": _team_json(g.home),
+        "away": _team_json(g.away),
+    }
 
 
 def to_json(r: Report) -> dict[str, Any]:
@@ -84,6 +99,7 @@ def to_json(r: Report) -> dict[str, Any]:
         "final_counts": dict(r.final_counts),
         "fatal": r.fatal,
         "flags": flags,
+        "games": {key: [_game_json(g) for g in r.games.get(key, [])] for key, _ in GENDERS},
     }
 
 
