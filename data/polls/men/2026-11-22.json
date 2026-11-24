@@ -1,0 +1,110 @@
+{
+  "gender": "men",
+  "title": "NABC Coaches",
+  "as_of": "2026-11-22",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Gannon, Pa."
+    },
+    {
+      "rank": 2,
+      "name": "Cal State East Bay"
+    },
+    {
+      "rank": 3,
+      "name": "DBU"
+    },
+    {
+      "rank": 4,
+      "name": "Washburn"
+    },
+    {
+      "rank": 5,
+      "name": "Nova Southeastern"
+    },
+    {
+      "rank": 6,
+      "name": "West Alabama"
+    },
+    {
+      "rank": 7,
+      "name": "Alabama Huntsville"
+    },
+    {
+      "rank": 8,
+      "name": "West Liberty"
+    },
+    {
+      "rank": 9,
+      "name": "Walsh"
+    },
+    {
+      "rank": 10,
+      "name": "Eastern New Mexico"
+    },
+    {
+      "rank": 11,
+      "name": "Oklahoma Baptist"
+    },
+    {
+      "rank": 12,
+      "name": "Fairmont State"
+    },
+    {
+      "rank": 13,
+      "name": "Lenoir-Rhyne"
+    },
+    {
+      "rank": 14,
+      "name": "Minnesota State"
+    },
+    {
+      "rank": 15,
+      "name": "Saint Michael's"
+    },
+    {
+      "rank": 16,
+      "name": "Saint Martin's"
+    },
+    {
+      "rank": 17,
+      "name": "West Texas A&M"
+    },
+    {
+      "rank": 18,
+      "name": "Columbus State"
+    },
+    {
+      "rank": 19,
+      "name": "Cal State San Bernardino"
+    },
+    {
+      "rank": 20,
+      "name": "Point Loma"
+    },
+    {
+      "rank": 21,
+      "name": "Missouri Western"
+    },
+    {
+      "rank": 22,
+      "name": "Trevecca Nazarene"
+    },
+    {
+      "rank": 23,
+      "name": "Black Hills State"
+    },
+    {
+      "rank": 24,
+      "name": "St. Cloud State"
+    },
+    {
+      "rank": 25,
+      "name": "Michigan Tech"
+    }
+  ],
+  "source": "https://ncaa-api.henrygd.me/rankings/basketball-men/d2/nabc-coaches",
+  "label": "NABC thru Nov 22",
+  "division": "d2"
+}

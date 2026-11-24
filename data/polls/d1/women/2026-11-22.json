@@ -1,0 +1,135 @@
+{
+  "gender": "women",
+  "title": "DI Women's Basketball: Associated Press",
+  "as_of": "2026-11-22",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "South Carolina",
+      "record": "6-0"
+    },
+    {
+      "rank": 2,
+      "name": "Michigan",
+      "record": "5-0"
+    },
+    {
+      "rank": 3,
+      "name": "Louisville",
+      "record": "9-0"
+    },
+    {
+      "rank": 4,
+      "name": "Southern Cal",
+      "record": "4-1"
+    },
+    {
+      "rank": 5,
+      "name": "Duke",
+      "record": "6-0"
+    },
+    {
+      "rank": 6,
+      "name": "Texas",
+      "record": "6-0"
+    },
+    {
+      "rank": 7,
+      "name": "UConn",
+      "record": "6-1"
+    },
+    {
+      "rank": 8,
+      "name": "Iowa",
+      "record": "6-1"
+    },
+    {
+      "rank": 9,
+      "name": "LSU",
+      "record": "7-0"
+    },
+    {
+      "rank": 10,
+      "name": "UCLA",
+      "record": "6-0"
+    },
+    {
+      "rank": 11,
+      "name": "Kentucky",
+      "record": "7-0"
+    },
+    {
+      "rank": 12,
+      "name": "Vanderbilt",
+      "record": "6-1"
+    },
+    {
+      "rank": 13,
+      "name": "Notre Dame",
+      "record": "6-0"
+    },
+    {
+      "rank": 14,
+      "name": "Oklahoma",
+      "record": "6-0"
+    },
+    {
+      "rank": 15,
+      "name": "TCU",
+      "record": "7-0"
+    },
+    {
+      "rank": 16,
+      "name": "Washington",
+      "record": "6-0"
+    },
+    {
+      "rank": 17,
+      "name": "Minnesota",
+      "record": "6-0"
+    },
+    {
+      "rank": 18,
+      "name": "Maryland",
+      "record": "5-1"
+    },
+    {
+      "rank": 19,
+      "name": "Ohio State",
+      "record": "5-2"
+    },
+    {
+      "rank": 20,
+      "name": "Illinois",
+      "record": "6-0"
+    },
+    {
+      "rank": 21,
+      "name": "Ole Miss",
+      "record": "5-1"
+    },
+    {
+      "rank": 22,
+      "name": "West Virginia",
+      "record": "5-0"
+    },
+    {
+      "rank": 23,
+      "name": "Nebraska",
+      "record": "6-0"
+    },
+    {
+      "rank": 24,
+      "name": "North Carolina",
+      "record": "5-1"
+    },
+    {
+      "rank": 25,
+      "name": "Baylor",
+      "record": "6-1"
+    }
+  ],
+  "source": "https://ncaa-api.henrygd.me/rankings/basketball-women/d1/associated-press",
+  "label": "AP thru Nov 22",
+  "division": "d1"
+}

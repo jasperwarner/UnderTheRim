@@ -1,0 +1,110 @@
+{
+  "gender": "women",
+  "title": "WBCA Coaches",
+  "as_of": "2026-11-23",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Grand Valley State"
+    },
+    {
+      "rank": 2,
+      "name": "Colorado Mesa"
+    },
+    {
+      "rank": 3,
+      "name": "Cal Poly Pomona"
+    },
+    {
+      "rank": 4,
+      "name": "Lenoir-Rhyne"
+    },
+    {
+      "rank": 5,
+      "name": "Gannon"
+    },
+    {
+      "rank": 6,
+      "name": "Winston-Salem State"
+    },
+    {
+      "rank": 7,
+      "name": "Holy Family"
+    },
+    {
+      "rank": 8,
+      "name": "Indiana, PA"
+    },
+    {
+      "rank": 9,
+      "name": "Minnesota Duluth"
+    },
+    {
+      "rank": 10,
+      "name": "Alabama-Huntsville"
+    },
+    {
+      "rank": 11,
+      "name": "Texas Woman’s"
+    },
+    {
+      "rank": 12,
+      "name": "Fort Hays State"
+    },
+    {
+      "rank": 13,
+      "name": "Fairmont State"
+    },
+    {
+      "rank": 14,
+      "name": "Northwood"
+    },
+    {
+      "rank": 15,
+      "name": "Carson-Newman"
+    },
+    {
+      "rank": 16,
+      "name": "Western Washington"
+    },
+    {
+      "rank": 17,
+      "name": "Bentley"
+    },
+    {
+      "rank": 18,
+      "name": "Embry-Riddle"
+    },
+    {
+      "rank": 19,
+      "name": "Central Washington"
+    },
+    {
+      "rank": 20,
+      "name": "Columbus State"
+    },
+    {
+      "rank": 21,
+      "name": "Tampa"
+    },
+    {
+      "rank": 22,
+      "name": "Augusta"
+    },
+    {
+      "rank": 23,
+      "name": "Cal State L.A."
+    },
+    {
+      "rank": 24,
+      "name": "West Texas A&M"
+    },
+    {
+      "rank": 25,
+      "name": "Mary"
+    }
+  ],
+  "source": "https://wbca.org/polls-ncaa-division-ii-coaches/",
+  "label": "WBCA Nov 24",
+  "division": "d2"
+}

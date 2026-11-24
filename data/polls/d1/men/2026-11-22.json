@@ -1,0 +1,135 @@
+{
+  "gender": "men",
+  "title": "DI Men's Basketball: Associated Press",
+  "as_of": "2026-11-22",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Houston",
+      "record": "6-0"
+    },
+    {
+      "rank": 2,
+      "name": "Virginia",
+      "record": "7-0"
+    },
+    {
+      "rank": 3,
+      "name": "Florida",
+      "record": "6-1"
+    },
+    {
+      "rank": 4,
+      "name": "Illinois",
+      "record": "5-1"
+    },
+    {
+      "rank": 5,
+      "name": "Texas Tech",
+      "record": "5-0"
+    },
+    {
+      "rank": 6,
+      "name": "UCLA",
+      "record": "6-0"
+    },
+    {
+      "rank": 7,
+      "name": "Texas",
+      "record": "6-0"
+    },
+    {
+      "rank": 8,
+      "name": "Arizona",
+      "record": "4-1"
+    },
+    {
+      "rank": 9,
+      "name": "Tennessee",
+      "record": "5-0"
+    },
+    {
+      "rank": 10,
+      "name": "UConn",
+      "record": "4-1"
+    },
+    {
+      "rank": 11,
+      "name": "Michigan State",
+      "record": "5-1"
+    },
+    {
+      "rank": 12,
+      "name": "Kansas",
+      "record": "5-1"
+    },
+    {
+      "rank": 13,
+      "name": "St. John's",
+      "record": "5-0"
+    },
+    {
+      "rank": 14,
+      "name": "Vanderbilt",
+      "record": "6-0"
+    },
+    {
+      "rank": 15,
+      "name": "Alabama",
+      "record": "5-0"
+    },
+    {
+      "rank": 16,
+      "name": "Duke",
+      "record": "4-2"
+    },
+    {
+      "rank": 17,
+      "name": "Miami (FL)",
+      "record": "5-1"
+    },
+    {
+      "rank": 18,
+      "name": "Southern Cal",
+      "record": "6-0"
+    },
+    {
+      "rank": 19,
+      "name": "BYU",
+      "record": "5-0"
+    },
+    {
+      "rank": 20,
+      "name": "LSU",
+      "record": "6-0"
+    },
+    {
+      "rank": 21,
+      "name": "Nebraska",
+      "record": "6-0"
+    },
+    {
+      "rank": 22,
+      "name": "Gonzaga",
+      "record": "3-1"
+    },
+    {
+      "rank": 23,
+      "name": "Indiana",
+      "record": "6-0"
+    },
+    {
+      "rank": 24,
+      "name": "Memphis",
+      "record": "4-1"
+    },
+    {
+      "rank": 25,
+      "name": "Louisville",
+      "record": "3-1"
+    }
+  ],
+  "source": "https://ncaa-api.henrygd.me/rankings/basketball-men/d1/associated-press",
+  "label": "AP thru Nov 22",
+  "division": "d1"
+}
