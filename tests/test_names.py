@@ -265,6 +265,48 @@ class RecordsTest(unittest.TestCase):
         self.assertIn("saint-marys-ca", warnings[0])
 
 
+class UnknownEverywhereTest(unittest.TestCase):
+    """A poll team that is on no scoreboard this season must not vanish silently."""
+
+    KNOWN = {"duke": "Duke", "ga-southwestern": "Ga. Southwestern"}
+
+    def _games(self):
+        return [game(team("uconn", "UConn"), team("duke", "Duke"))]
+
+    def test_unknown_everywhere_warns_once_when_roster_exists(self):
+        rank_map, warnings = build_rank_map(poll((3, "Connecticut")), self._games(), {},
+                                            known=self.KNOWN)
+        self.assertEqual(rank_map, {})
+        self.assertEqual(len(warnings), 1)
+        self.assertIn('Poll team "Connecticut" (men)', warnings[0])
+        self.assertIn("not found on any scoreboard this season", warnings[0])
+        self.assertIn("alias", warnings[0])
+
+    def test_empty_roster_stays_quiet(self):
+        for known in (None, {}):
+            _, warnings = build_rank_map(poll((3, "Connecticut")), self._games(), {},
+                                         known=known)
+            self.assertEqual(warnings, [], known)
+
+    def test_near_miss_entry_gets_only_the_near_miss_warning(self):
+        g = [game(team("cal-st-east-bay", "Cal St. East Bay"), team("other", "Zzz"))]
+        _, warnings = build_rank_map(poll((1, "Cal State Eastbay")), g, {}, known=self.KNOWN)
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("Possible name mismatch", warnings[0])
+
+    def test_known_but_not_playing_entry_gets_none(self):
+        _, warnings = build_rank_map(poll((5, "Ga. Southwestern")), self._games(), {},
+                                     known=self.KNOWN)
+        self.assertEqual(warnings, [])
+
+    def test_one_warning_per_unmatched_entry(self):
+        _, warnings = build_rank_map(poll((3, "Connecticut"), (4, "Gonzaga"), (5, "Duke")),
+                                     self._games(), {}, known=self.KNOWN)
+        self.assertEqual(len(warnings), 2)
+        self.assertIn("Connecticut", warnings[0])
+        self.assertIn("Gonzaga", warnings[1])
+
+
 class LoadAliasesTest(unittest.TestCase):
     def _load(self, text):
         with tempfile.TemporaryDirectory() as tmp:

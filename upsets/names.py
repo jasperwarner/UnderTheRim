@@ -173,6 +173,14 @@ def build_rank_map(
                 f'to scoreboard "{best.name}" ({best.seo}) — if they are the same school, '
                 f'add an alias; if not, add them to not_same in aliases.json'
             )
+        elif known:
+            # Nothing similar today and not a team seen this season: its rank would
+            # be lost silently. (With no season list we can't tell, so stay quiet.)
+            warnings.append(
+                f'Poll team "{entry.name}" ({poll.gender}) was not found on any '
+                f'scoreboard this season — if it is on the scoreboard under another '
+                f'name, add an alias in aliases.json'
+            )
     return rank_map, warnings
 
 
