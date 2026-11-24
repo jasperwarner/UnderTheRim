@@ -72,9 +72,9 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     aliases = _safe_aliases(root, warnings)
     d2_conferences = _safe_d2_conferences(root, warnings)
     roster = load_roster(root, warnings)
-    flags: dict[str, list] = {g: [] for g in GENDERS}
-    all_games: dict[str, list] = {g: [] for g in GENDERS}
-    final_counts = {g: 0 for g in GENDERS}
+    flags: dict[tuple, list] = {("d2", g): [] for g in GENDERS}
+    all_games: dict[tuple, list] = {("d2", g): [] for g in GENDERS}
+    final_counts = {("d2", g): 0 for g in GENDERS}
     polls_used: dict[str, str] = {}
     fatal = False
     scoreboards_down = 0
@@ -129,8 +129,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
         if not games and day.month in IN_SEASON_MONTHS:
             warnings.append(f"No {low}'s games found for {day} — verify on ncaa.com.")
         total_games += len(games)
-        all_games[gender] = games
-        final_counts[gender] = sum(1 for g in games if g.is_final)
+        all_games[("d2", gender)] = games
+        final_counts[("d2", gender)] = sum(1 for g in games if g.is_final)
         for g in games:
             if not g.is_final:
                 warnings.append(
@@ -155,7 +155,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
             if not complete:
                 warnings.append(f"Box score incomplete for {flag.headline} ({flag.game.link})"
                                 " — 35+ check may have missed someone")
-        flags[gender] = gender_flags
+        flags[("d2", gender)] = gender_flags
 
     if polls_missing == 2:
         fatal = True
@@ -178,7 +178,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     data_dir.mkdir(parents=True, exist_ok=True)
     try:  # remember today's teams, so a ranked team that is off tomorrow is recognized
         for gender in GENDERS:
-            add_games(roster, gender, all_games[gender])
+            add_games(roster, gender, all_games[("d2", gender)])
         save_roster(roster, root)
     except OSError as e:
         print(f"Warning: could not save data/teams.json: {type(e).__name__}", file=sys.stderr)
@@ -206,9 +206,9 @@ def _crash_message(e: BaseException, secrets: list) -> str:
 
 def _report_crash(e: BaseException, day: date, notion, secrets: list) -> int:
     """Print and (if possible) publish a Failed page for an unexpected crash. Always 1."""
-    report = Report(day=day, flags={g: [] for g in GENDERS},
+    report = Report(day=day, flags={("d2", g): [] for g in GENDERS},
                     warnings=[_crash_message(e, secrets)],
-                    final_counts={g: 0 for g in GENDERS}, polls_used="n/a", fatal=True)
+                    final_counts={("d2", g): 0 for g in GENDERS}, polls_used="n/a", fatal=True)
     print(to_text(report), flush=True)
     if notion is not None:
         try:

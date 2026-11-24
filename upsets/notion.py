@@ -74,7 +74,7 @@ class NotionClient:
         """
         day = r.day.isoformat()
         blocks = to_notion_blocks(r)
-        title = f"D2 Upsets — {r.day.strftime('%b')} {r.day.day}, {r.day.year}"
+        title = f"Upsets — {r.day.strftime('%b')} {r.day.day}, {r.day.year}"
         page = self._call("POST", "/pages", {
             "parent": {"database_id": self._database_id},
             "properties": {

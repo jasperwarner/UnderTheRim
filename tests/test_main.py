@@ -79,7 +79,9 @@ class MainRunTest(unittest.TestCase):
 
     def test_full_run_on_fixtures(self):
         r = run(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
-        self.assertEqual(r.final_counts, {"men": 109, "women": 109})
+        self.assertEqual(r.final_counts, {("d2", "men"): 109, ("d2", "women"): 109})
+        self.assertEqual(set(r.flags), {("d2", "men"), ("d2", "women")})
+        self.assertEqual(set(r.games), {("d2", "men"), ("d2", "women")})
         not_final = [w for w in r.warnings if w.startswith("Not final (men)")]
         self.assertEqual(len(not_final), 1)
         self.assertIn("Selma", not_final[0])
@@ -104,7 +106,7 @@ class MainRunTest(unittest.TestCase):
                 fetch=make_fetch(women_poll=False), notion=None)
         self.assertTrue(any("Women's poll couldn't be read today" in w for w in r.warnings))
         self.assertFalse(r.fatal)
-        self.assertEqual(r.flags["women"], [])
+        self.assertEqual(r.flags[("d2", "women")], [])
 
     def test_both_scoreboards_down_is_fatal(self):
         r = run(date(2026, 11, 21), self.root, dry_run=True,
@@ -133,7 +135,7 @@ class MainRunTest(unittest.TestCase):
         box = [PlayerLine("Big Guy", "x", 40)]
         r = run(date(2026, 11, 21), self.root, dry_run=True,
                 fetch=make_fetch(boxscore=box), notion=None)
-        for fl in r.flags["men"]:
+        for fl in r.flags[("d2", "men")]:
             self.assertTrue(any("35+ pts: Big Guy 40" in t for t in fl.tags))
 
     def test_zero_games_in_season_warns(self):
@@ -246,9 +248,9 @@ class MainRunTest(unittest.TestCase):
     def test_daily_json_has_raw_games(self):
         run(date(2026, 11, 21), self.root, dry_run=False, fetch=make_fetch(), notion=None)
         saved = json.loads((self.root / "data" / "2026-11-21.json").read_text())
-        self.assertEqual(len(saved["games"]["men"]), 110)
-        self.assertEqual(len(saved["games"]["women"]), 109)
-        g = saved["games"]["men"][0]
+        self.assertEqual(len(saved["games"]["d2"]["men"]), 110)
+        self.assertEqual(len(saved["games"]["d2"]["women"]), 109)
+        g = saved["games"]["d2"]["men"][0]
         self.assertEqual(set(g), {"id", "gameState", "currentPeriod", "home", "away"})
         self.assertEqual(set(g["home"]), {"seo", "name", "score", "conferenceSeo"})
 
@@ -269,7 +271,7 @@ class MainRunTest(unittest.TestCase):
         with contextlib.redirect_stdout(out):
             run(date(2026, 11, 21), self.root, dry_run=False, fetch=make_fetch(),
                 notion=Recorder())
-        self.assertIn("D2 upsets for 2026-11-21", printed[0])
+        self.assertIn("Upsets for 2026-11-21", printed[0])
 
 
 class MainEntryTest(unittest.TestCase):
@@ -311,6 +313,8 @@ class MainEntryTest(unittest.TestCase):
         r = n.reports[0]
         self.assertEqual(r.status, "Failed")
         self.assertEqual(r.warnings, ["Program crashed: RuntimeError: kaboom *** here"])
+        self.assertEqual(r.flags, {("d2", "men"): [], ("d2", "women"): []})
+        self.assertIn("Division II", self.out.getvalue())
         self.assertIn("Program crashed: RuntimeError", self.out.getvalue())
         self.assertNotIn("secret_tok_123", self.out.getvalue() + self.err.getvalue())
 
@@ -324,7 +328,7 @@ class MainEntryTest(unittest.TestCase):
     def test_notion_failure_returns_1_after_printing(self):
         n = FakeNotion(fail=NotionError("Notion 400: bad"))
         self.assertEqual(self._main(make_fetch(), n), 1)
-        self.assertIn("D2 upsets for 2026-11-21", self.out.getvalue())
+        self.assertIn("Upsets for 2026-11-21", self.out.getvalue())
         self.assertIn("could not publish to Notion", self.err.getvalue())
 
     def test_missing_env_returns_1(self):

@@ -8,7 +8,8 @@ import urllib.error
 
 from upsets.http import FetchError
 from upsets.notion import NotionClient
-from upsets.report import Report
+from upsets.models import Flag, Game, Team
+from upsets.report import Report, to_notion_blocks
 
 TOKEN = "secret_abc123"
 
@@ -62,9 +63,10 @@ class FakeOpener:
 def make_report(blocks_flags=None):
     return Report(
         day=datetime.date(2026, 11, 21),
-        flags={"men": [], "women": []},
+        flags=blocks_flags if blocks_flags is not None else {("d2", "men"): [],
+                                                              ("d2", "women"): []},
         warnings=[],
-        final_counts={"men": 5, "women": 4},
+        final_counts={("d2", "men"): 5, ("d2", "women"): 4},
         polls_used="men: 11/17",
     )
 
@@ -133,7 +135,7 @@ class NotionClientTests(unittest.TestCase):
         self.assertEqual(body["parent"], {"database_id": "db1"})
         props = body["properties"]
         self.assertEqual(props["Status"]["select"]["name"], r.status)
-        self.assertEqual(props["Name"]["title"][0]["text"]["content"], "D2 Upsets — Nov 21, 2026")
+        self.assertEqual(props["Name"]["title"][0]["text"]["content"], "Upsets — Nov 21, 2026")
         self.assertEqual(props["Date"], {"date": {"start": "2026-11-21"}})
         self.assertEqual(props["Flags"], {"number": 0})
         self.assertEqual(props["Polls used"]["rich_text"][0]["text"]["content"], "men: 11/17")
@@ -157,6 +159,29 @@ class NotionClientTests(unittest.TestCase):
         self.assertEqual([c[0] for c in appends], ["PATCH", "PATCH"])
         self.assertTrue(all(c[1].endswith("/v1/blocks/newpage/children") for c in appends))
         self.assertEqual([len(c[2]["children"]) for c in appends], [100, 50])
+
+    def test_real_two_division_page_is_chunked(self):
+        def flag(division, gender, n):
+            g = Game(str(n), gender, Team("a", "A", 70, True, "c"), Team("b", "B", 60, False, "c"),
+                     "final", "FINAL", f"/game/{n}", division=division)
+            return Flag(g, f"Game {n}", ["Upset"], division=division, story="Big story",
+                        facts=["fact one", "fact two"])
+        flags = {(d, g): [flag(d, g, i * 100 + j) for j in range(15)]
+                 for i, (d, g) in enumerate([("d1", "men"), ("d1", "women"),
+                                             ("d2", "men"), ("d2", "women")])}
+        r = make_report(flags)
+        blocks = to_notion_blocks(r)
+        self.assertGreater(len(blocks), 100)
+        op = FakeOpener()
+        NotionClient(TOKEN, "db1", opener=op).publish(r)
+        sent = op.calls[0][2]["children"]
+        self.assertEqual(len(sent), 100)
+        for c in op.calls[1:]:
+            if c[0] == "PATCH" and c[1].endswith("/v1/blocks/newpage/children"):
+                self.assertLessEqual(len(c[2]["children"]), 100)
+                sent = sent + c[2]["children"]
+        self.assertEqual(sent, blocks)
+        self.assertEqual(op.calls[0][2]["properties"]["Flags"], {"number": 60})
 
     def test_token_not_in_error(self):
         err = urllib.error.HTTPError(
