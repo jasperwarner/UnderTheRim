@@ -113,7 +113,7 @@ At about 6–7 AM Eastern, a new page appears in your database for the previous 
 
 - **OK**: everything worked. The list is complete.
 - **Check data**: the page was written, but something was a little off. A warning at the top of the page says what. Examples: a game wasn't final yet, a team's name in the poll didn't match the scoreboard, or a box score looked incomplete (so a 35-point game might have been missed). The flags are probably still right.
-- **Failed**: the program could not do its job that day. Nothing reliable on the page. GitHub will also email you.
+- **Failed**: some or all of the check could not be done that day (for example, a scoreboard was down, or one part of the program hit an error). The warnings at the top of the page say which part. Any section that was checked is still right: if Division I failed, the Division II results can still be correct, and the other way round. A part that couldn't be checked says **Not checked — see warnings above** instead of "No flags.", so an empty list with no such note really does mean no flags. If a poll was missing, the section says **Ranked-team checks skipped (no poll)**, because the ranked-team rules couldn't run. GitHub will also email you when a day fails.
 
 (Before March 8 it's usually a little after 6 AM; from March 8, when the clocks change, a little after 7 AM. GitHub sometimes starts a few minutes late.)
 
@@ -133,7 +133,9 @@ The labels are only guides. They never hide anything: every flag still shows up 
 
 ### Division I and Division II on one page
 
-Division I and Division II results share one Notion page for each day, in two separate sections (Division I first, then Division II). Each section has its own men's and women's lists. The line at the bottom of the page tells you which poll was used for each division. Ranks are matched only against the right division's poll, so a Division I team is never compared with a Division II poll.
+Division I and Division II results share one Notion page for each day, in two separate sections (Division I first, then Division II). Each section has its own men's and women's lists. The line at the bottom of the page only shows how many games were checked. Which poll was used for each division is in the **Polls used** column of the database, and in the daily log on GitHub. Ranks are matched only against the right division's poll, so a Division I team is never compared with a Division II poll.
+
+One thing to know about the **Flags** number: a game between a Division I school and a Division II school can show up in both sections, so it can be counted twice in that number.
 
 For Division I the ranks come from the AP Top 25 poll (AP stands for Associated Press, the news agency). On a first run the program has no saved Division I poll yet, so a day from before that can only be checked against the newest poll. When that happens the page says so in a warning ("ranks are from a poll released after this game"), and you should trust that day's Division I flags less. From now on, the program saves each new poll in `data/polls/d1/` as it goes, so new days are checked against the poll that was really in force.
 
