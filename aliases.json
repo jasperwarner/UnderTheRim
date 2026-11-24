@@ -1,13 +1,22 @@
 {
   "men": {
     "Oklahoma Baptist": "okla-baptist",
-    "Florida Southern": "fla-southern"
+    "Florida Southern": "fla-southern",
+    "Alabama Huntsville": "ala-huntsville"
   },
   "women": {
     "Winston-Salem State": "winston-salem",
     "Minnesota Duluth": "minn-duluth",
     "Embry-Riddle": "embry-riddle-fl",
     "Central Washington": "central-wash",
-    "Western Washington": "western-wash"
+    "Western Washington": "western-wash",
+    "Alabama-Huntsville": "ala-huntsville"
+  },
+  "not_same": {
+    "men": {},
+    "women": {
+      "Grand Valley State": ["fort-valley-st"],
+      "Colorado Mesa": ["colorado-mines"]
+    }
   }
 }

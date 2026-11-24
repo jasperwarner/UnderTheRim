@@ -31,7 +31,7 @@ def _safe_aliases(root: Path, warnings: list) -> dict:
         reason = type(e).__name__
         warnings.append(f"aliases.json couldn't be read ({reason}) — "
                         "name matching may miss ranked teams.")
-        return {"men": {}, "women": {}}
+        return {"men": {}, "women": {}, "not_same": {"men": {}, "women": {}}}
 
 
 def _pick_poll(gender, day, root, fetched, warnings):
@@ -121,7 +121,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
 
         ranks: dict[str, int] = {}
         if poll is not None:
-            ranks, name_warnings = build_rank_map(poll, games, aliases[gender])
+            ranks, name_warnings = build_rank_map(poll, games, aliases[gender],
+                                                  aliases["not_same"][gender])
             warnings.extend(name_warnings)
         gender_flags = flag_games(games, ranks)
         for flag in gender_flags:
