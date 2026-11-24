@@ -17,6 +17,7 @@ from upsets.main import main, run
 from upsets.models import Game, PlayerLine, Poll, PollEntry, Team
 from upsets.notion import NotionError
 from upsets.polls_store import save_poll
+from upsets.report import to_json, to_text
 from upsets.story import INCOMPLETE_LINE
 
 FIX = Path(__file__).parent / "fixtures"
@@ -459,6 +460,68 @@ class TwoDivisionRunTest(unittest.TestCase):
         self.assertEqual(len(r.flags[("d1", "men")]), 1)
         self.assertEqual(len(r.flags[("d1", "women")]), 1)
 
+    def _section(self, text, division_title, gender_title):
+        """The lines under one (division, gender) heading of the text report."""
+        start = text.index(f"\n{division_title}\n")
+        end = text.find("\nDivision II\n", start + 1) if division_title == "Division I" \
+            else len(text)
+        block = text[start:end]
+        i = block.index(f"\n{gender_title}\n") + len(gender_title) + 2
+        j = block.find("\n\n", i)
+        return block[i:] if j == -1 else block[i:j]
+
+    def test_scoreboard_down_marks_slot_not_checked(self):
+        r = run(BOTH_DAY, self.root, dry_run=True, notion=None,
+                fetch=make_fetch(d1_men_board=False))
+        self.assertEqual(r.unchecked, {("d1", "men")})
+        text = to_text(r)
+        self.assertIn("Not checked — see warnings above.",
+                      self._section(text, "Division I", "Men's"))
+        self.assertNotIn("No flags.", self._section(text, "Division I", "Men's"))
+        self.assertIn("Men: not checked", text)
+        self.assertNotIn("No upsets yesterday", text)
+
+    def test_missing_poll_marks_slot_ranked_checks_skipped(self):
+        r = run(BOTH_DAY, self.root, dry_run=True, notion=None,
+                fetch=make_fetch(d1_men_poll=False))
+        self.assertEqual(r.unchecked, {("d1", "men")})
+        self.assertEqual(r.ranked_skipped, {("d1", "men")})
+        section = self._section(to_text(r), "Division I", "Men's")
+        self.assertIn("Ranked-team checks skipped (no poll) — see warnings above.", section)
+        self.assertNotIn("No flags.", section)
+
+    def test_crashed_slot_is_not_checked_and_has_no_partial_data(self):
+        with self._flag_games_failing_for("d1", RuntimeError("bad rank data")):
+            r = run(BOTH_DAY, self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertEqual(r.unchecked, {("d1", "men"), ("d1", "women")})
+        for g in ("men", "women"):
+            self.assertEqual(r.final_counts[("d1", g)], 0)
+            self.assertEqual(r.games[("d1", g)], [])
+        text = to_text(r)
+        self.assertNotIn("No flags.", text[text.index("Division I\n"):text.index("Division II\n")])
+        self.assertIn("Division I — Men: not checked · Women: not checked", text)
+        self.assertEqual(to_json(r)["unchecked"], ["d1-men", "d1-women"])
+
+    def test_crashed_slot_stays_off_the_roster(self):
+        with self._flag_games_failing_for("d1", RuntimeError("bad")):
+            run(BOTH_DAY, self.root, dry_run=False, fetch=make_fetch(), notion=FakeNotion())
+        d1 = json.loads((self.root / "data" / "teams_d1.json").read_text())
+        self.assertEqual(d1["men"], {})
+
+    def test_clean_day_has_nothing_unchecked(self):
+        r = run(BOTH_DAY, self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertEqual(r.unchecked, set())
+        self.assertNotIn("Not checked", to_text(r))
+        self.assertEqual(to_json(r)["unchecked"], [])
+
+    def test_clean_d2_text_has_no_unchecked_wording(self):
+        r = run_d2(date(2026, 11, 21), self.root, dry_run=True, fetch=make_fetch(), notion=None)
+        self.assertEqual(r.unchecked, set())
+        text = to_text(r)
+        for word in ("Not checked", "not checked", "skipped"):
+            self.assertNotIn(word, text)
+        self.assertIn("Men: 109 final games checked · Women: 109", text)
+
     def test_real_run_saves_d1_poll_and_roster(self):
         run(BOTH_DAY, self.root, dry_run=False, fetch=make_fetch(), notion=FakeNotion())
         self.assertTrue((self.root / "data" / "polls" / "d1" / "men" / "2026-11-22.json")
@@ -684,8 +747,14 @@ class MainEntryTest(unittest.TestCase):
         r = n.reports[0]
         self.assertEqual(r.status, "Failed")
         self.assertEqual(r.warnings, ["Program crashed: RuntimeError: kaboom *** here"])
-        self.assertEqual(r.flags, {("d2", "men"): [], ("d2", "women"): []})
-        self.assertIn("Division II", self.out.getvalue())
+        self.assertEqual(r.flags, {(d, g): [] for d in ("d1", "d2") for g in ("men", "women")})
+        self.assertEqual(r.unchecked, set(r.flags))
+        out = self.out.getvalue()
+        self.assertIn("Division I\n", out)
+        self.assertIn("Division II\n", out)
+        self.assertEqual(out.count("Not checked — see warnings above."), 4)
+        self.assertNotIn("No flags.", out)
+        self.assertIn("Nothing could be checked", out)
         self.assertIn("Program crashed: RuntimeError", self.out.getvalue())
         self.assertNotIn("secret_tok_123", self.out.getvalue() + self.err.getvalue())
 

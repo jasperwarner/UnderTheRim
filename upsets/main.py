@@ -110,6 +110,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     total_games = 0
     polls_missing = 0
     failed: set = set()  # slots that crashed part-way: their teams stay off the roster
+    unchecked: set = set()  # slots the report must show as "Not checked", never "No flags."
+    ranked_skipped: set = set()  # the unchecked slots that did read their scoreboard
 
     for division in divisions:
         title = DIVISION_TITLES[division]
@@ -127,6 +129,7 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
                 except (FetchError, ParseError):
                     fatal = True
                     scoreboards_down += 1
+                    unchecked.add(key)
                     warnings.append(f"{pre}{cap} scoreboard couldn't be fetched.")
                     polls_used[key] = f"{cap} n/a"
                     continue
@@ -146,6 +149,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
                 poll = _pick_poll(gender, day, root, fetched, warnings, division, pre)
                 if poll is None:
                     polls_missing += 1
+                    unchecked.add(key)
+                    ranked_skipped.add(key)
                     warnings.append(f"{pre}{poss} poll couldn't be read today — "
                                     f"{low}'s ranked rules skipped.")
                     polls_used[key] = f"{cap} none"
@@ -201,7 +206,11 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
             except Exception as e:  # one slot failing must not blank the other slots
                 fatal = True
                 failed.add(key)
+                unchecked.add(key)
+                ranked_skipped.discard(key)  # a crash is "Not checked", whatever came first
                 flags[key] = []
+                final_counts[key] = 0  # no partial data in the footer or the roster
+                all_games[key] = []
                 polls_used.setdefault(key, f"{gender.capitalize()} n/a")
                 warnings.append(f"{DIVISION_TITLES[division]}: {gender.capitalize()} couldn't be "
                                 f"checked — unexpected error: {_error_text(e, secrets)}. "
@@ -213,7 +222,8 @@ def run(day: date, root: Path, *, dry_run: bool, fetch=sources,
     polls_text = " | ".join(
         f"{d.upper()}: " + " · ".join(polls_used[(d, g)] for g in GENDERS) for d in divisions)
     report = Report(day=day, flags=flags, warnings=warnings, final_counts=final_counts,
-                    polls_used=polls_text, fatal=fatal, games=all_games)
+                    polls_used=polls_text, fatal=fatal, games=all_games,
+                    unchecked=unchecked, ranked_skipped=ranked_skipped)
 
     # Print first, so the GitHub log has the report even if saving or Notion fails.
     print(to_text(report), flush=True)
@@ -266,9 +276,11 @@ def _crash_message(e: BaseException, secrets: list) -> str:
 
 def _report_crash(e: BaseException, day: date, notion, secrets: list) -> int:
     """Print and (if possible) publish a Failed page for an unexpected crash. Always 1."""
-    report = Report(day=day, flags={("d2", g): [] for g in GENDERS},
+    keys = [(d, g) for d in DIVISIONS for g in GENDERS]
+    report = Report(day=day, flags={k: [] for k in keys},
                     warnings=[_crash_message(e, secrets)],
-                    final_counts={("d2", g): 0 for g in GENDERS}, polls_used="n/a", fatal=True)
+                    final_counts={k: 0 for k in keys}, polls_used="n/a", fatal=True,
+                    unchecked=set(keys))
     print(to_text(report), flush=True)
     if notion is not None:
         try:

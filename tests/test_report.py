@@ -213,5 +213,91 @@ class DivisionTest(unittest.TestCase):
         self.assertEqual(d["flag_count"], 2)
 
 
+class UncheckedTest(unittest.TestCase):
+    NOT_CHECKED = "Not checked — see warnings above."
+    SKIPPED = "Ranked-team checks skipped (no poll) — see warnings above."
+
+    def both(self, unchecked=(), ranked_skipped=(), flags=None):
+        r = make_report(flags if flags is not None else dict(BOTH_EMPTY),
+                        final_counts={("d1", "men"): 0, ("d1", "women"): 140,
+                                      ("d2", "men"): 110, ("d2", "women"): 98})
+        r.unchecked = set(unchecked)
+        r.ranked_skipped = set(ranked_skipped)
+        return r
+
+    def test_default_is_empty_and_old_construction_works(self):
+        r = make_report()
+        self.assertEqual(r.unchecked, set())
+        self.assertEqual(r.ranked_skipped, set())
+        self.assertEqual(to_json(r)["unchecked"], [])
+
+    def test_clean_day_text_is_unchanged(self):
+        t = to_text(make_report())
+        self.assertIn("No upsets yesterday — 110 men's and 98 women's games checked.", t)
+        self.assertEqual(t.count("No flags."), 2)
+        self.assertNotIn("Not checked", t)
+        self.assertIn("\nMen: 110 final games checked · Women: 98\n", t)
+
+    def test_unchecked_slot_says_not_checked_not_no_flags(self):
+        r = self.both(unchecked=[("d1", "men")])
+        t = to_text(r)
+        d1 = t[t.index("Division I\n"):t.index("Division II\n")]
+        men, women = d1.split("Women's")
+        self.assertIn(self.NOT_CHECKED, men)
+        self.assertNotIn("No flags.", men)
+        self.assertIn("No flags.", women)
+        texts_ = [block_text(b) for b in to_notion_blocks(r)]
+        self.assertIn(self.NOT_CHECKED, texts_)
+        self.assertEqual(texts_.count("No flags."), 3)
+
+    def test_unchecked_slot_is_left_out_of_the_no_upsets_line(self):
+        r = self.both(unchecked=[("d1", "men")])
+        line = block_text(to_notion_blocks(r)[0])
+        self.assertNotIn("No upsets yesterday", line)
+        self.assertIn("110 men's and 238 women's games checked", line)
+        self.assertIn("Division I men's", line)
+        self.assertIn(line, to_text(r))
+
+    def test_everything_unchecked_says_nothing_was_checked(self):
+        keys = list(BOTH_EMPTY)
+        r = self.both(unchecked=keys)
+        line = block_text(to_notion_blocks(r)[0])
+        self.assertEqual(line, "Nothing could be checked — see warnings above.")
+        t = to_text(r)
+        self.assertNotIn("No flags.", t)
+        self.assertNotIn("No upsets", t)
+        self.assertEqual(t.count(self.NOT_CHECKED), 4)
+
+    def test_footer_does_not_count_unchecked_slots(self):
+        r = self.both(unchecked=[("d1", "men")])
+        footer = block_text(to_notion_blocks(r)[-1])
+        self.assertEqual(footer, "Division I — Men: not checked · Women: 140"
+                                 " · Division II — Men: 110 final games checked · Women: 98")
+        r = self.both(unchecked=[("d2", "women")])
+        self.assertTrue(block_text(to_notion_blocks(r)[-1]).endswith(
+            "Division II — Men: 110 final games checked · Women: not checked"))
+
+    def test_unchecked_slot_keeps_flags_it_has_and_adds_the_note(self):
+        flags = dict(BOTH_EMPTY)
+        flags[("d1", "men")] = [make_flag(division="d1", game_id="9")]
+        r = self.both(unchecked=[("d1", "men")], ranked_skipped=[("d1", "men")], flags=flags)
+        t = to_text(r)
+        self.assertIn("https://www.ncaa.com/game/9", t)
+        self.assertIn(self.SKIPPED, t)
+        self.assertNotIn(self.NOT_CHECKED, t)
+
+    def test_ranked_skipped_slot_without_flags_says_so(self):
+        r = self.both(unchecked=[("d2", "men")], ranked_skipped=[("d2", "men")])
+        t = to_text(r)
+        self.assertIn(self.SKIPPED, t)
+        self.assertNotIn("No upsets yesterday", t)
+        self.assertIn("Division II — Men: ranked checks skipped · Women: 98", t)
+
+    def test_json_lists_unchecked_slots(self):
+        r = self.both(unchecked=[("d2", "women"), ("d1", "men")])
+        d = json.loads(json.dumps(to_json(r)))
+        self.assertEqual(d["unchecked"], ["d1-men", "d2-women"])
+
+
 if __name__ == "__main__":
     unittest.main()

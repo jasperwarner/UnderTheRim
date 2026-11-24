@@ -21,6 +21,12 @@ class Report:
     polls_used: str
     fatal: bool = False
     games: dict[Key, list[Game]] = field(default_factory=dict)
+    # (division, gender) slots that were not fully checked: their scoreboard couldn't be
+    # fetched, they crashed, or their poll was missing. Shown as "Not checked", never as
+    # "No flags.", and left out of the "games checked" counts.
+    unchecked: set = field(default_factory=set)
+    # The part of `unchecked` that did read its scoreboard but skipped the ranked-team rules.
+    ranked_skipped: set = field(default_factory=set)
 
     @property
     def status(self) -> str:
@@ -43,19 +49,48 @@ def _count(r: Report, division: str, gender: str) -> int:
     return r.final_counts.get((division, gender), 0)
 
 
+NOT_CHECKED = "Not checked — see warnings above."
+RANKED_SKIPPED = "Ranked-team checks skipped (no poll) — see warnings above."
+
+
+def _slot_note(r: Report, division: str, gender: str) -> Optional[str]:
+    key = (division, gender)
+    if key not in r.unchecked:
+        return None
+    return RANKED_SKIPPED if key in r.ranked_skipped else NOT_CHECKED
+
+
+def _checked_total(r: Report, gender: str) -> int:
+    return sum(_count(r, d, gender) for d, _ in _divisions(r) if (d, gender) not in r.unchecked)
+
+
 def _no_upsets_line(r: Report) -> str:
-    divs = [d for d, _ in _divisions(r)]
-    men = sum(_count(r, d, "men") for d in divs)
-    women = sum(_count(r, d, "women") for d in divs)
-    return f"No upsets yesterday — {men} men's and {women} women's games checked."
+    left_out = [f"{title} {poss.lower()}" for d, title in _divisions(r)
+                for g, poss in GENDERS if (d, g) in r.unchecked]
+    if not left_out:
+        return (f"No upsets yesterday — {_checked_total(r, 'men')} men's and "
+                f"{_checked_total(r, 'women')} women's games checked.")
+    slots = [(d, g) for d, _ in _divisions(r) for g, _ in GENDERS]
+    if all(k in r.unchecked for k in slots):
+        return "Nothing could be checked — see warnings above."
+    return (f"No upsets in the games that were checked — {_checked_total(r, 'men')} men's and "
+            f"{_checked_total(r, 'women')} women's games checked. "
+            f"Not checked: {', '.join(left_out)}.")
+
+
+def _footer_part(r: Report, division: str, gender: str, suffix: str) -> str:
+    note = _slot_note(r, division, gender)
+    if note is None:
+        return f"{_count(r, division, gender)}{suffix}"
+    return "ranked checks skipped" if note == RANKED_SKIPPED else "not checked"
 
 
 def _footer(r: Report) -> str:
     divs = _divisions(r)
     parts = []
     for d, title in divs:
-        part = (f"Men: {_count(r, d, 'men')} final games checked"
-                f" · Women: {_count(r, d, 'women')}")
+        part = (f"Men: {_footer_part(r, d, 'men', ' final games checked')}"
+                f" · Women: {_footer_part(r, d, 'women', '')}")
         parts.append(part if len(divs) == 1 else f"{title} — {part}")
     return " · ".join(parts)
 
@@ -80,11 +115,14 @@ def to_text(r: Report) -> str:
         for gender, title in GENDERS:
             lines += ["", title]
             flags = r.flags.get((division, gender), [])
-            if not flags:
+            note = _slot_note(r, division, gender)
+            if not flags and note is None:
                 lines.append("No flags.")
             for f in flags:
                 lines.append(f"- {_flag_line(f)}  {f.game.link}")
                 lines += [f"    {fact}" for fact in _facts(f)]
+            if note is not None:
+                lines.append(note)
     lines += ["", _footer(r), f"Polls used: {r.polls_used}"]
     return "\n".join(lines)
 
@@ -138,6 +176,7 @@ def to_json(r: Report) -> dict[str, Any]:
         "warnings": list(r.warnings),
         "final_counts": {d: {g: _count(r, d, g) for g, _ in GENDERS} for d in divisions},
         "fatal": r.fatal,
+        "unchecked": sorted(f"{d}-{g}" for d, g in r.unchecked),
         "flags": flags,
         "games": {d: {g: [_game_json(x) for x in r.games.get((d, g), [])] for g, _ in GENDERS}
                   for d in divisions},
@@ -167,7 +206,8 @@ def to_notion_blocks(r: Report) -> list[dict[str, Any]]:
         for gender, title in GENDERS:
             blocks.append(_block("heading_3", [_text(title)]))
             flags = r.flags.get((division, gender), [])
-            if not flags:
+            note = _slot_note(r, division, gender)
+            if not flags and note is None:
                 blocks.append(_block("paragraph", [_text("No flags.")]))
             for f in flags:
                 blocks.append(_block("bulleted_list_item", [
@@ -175,5 +215,7 @@ def to_notion_blocks(r: Report) -> list[dict[str, Any]]:
                     _text("ncaa.com ↗", f.game.link),
                 ]))
                 blocks += [_block("paragraph", [_text(fact)]) for fact in _facts(f)]
+            if note is not None:
+                blocks.append(_block("paragraph", [_text(note)]))
     blocks.append(_block("paragraph", [_text(_footer(r))]))
     return blocks
