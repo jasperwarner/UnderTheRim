@@ -1,0 +1,57 @@
+name: D2 upset alerts
+
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Date to check, like 2026-11-21 (leave blank for yesterday)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run tests
+        run: python -m unittest discover -s tests
+
+      - name: Check games and write the Notion page
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          DATE: ${{ inputs.date }}
+        run: |
+          if [ -n "$DATE" ]; then
+            python -m upsets.main --date "$DATE"
+          else
+            python -m upsets.main
+          fi
+
+      - name: Save data files
+        if: always()
+        run: |
+          git config user.name "d2-upsets bot"
+          git config user.email "d2-upsets-bot@users.noreply.github.com"
+          mkdir -p data
+          git add data aliases.json
+          if git diff --cached --quiet; then
+            echo "Nothing new to save."
+          else
+            git commit -m "data: daily update"
+            git push
+          fi
