@@ -1,0 +1,29 @@
+Upsets for 2026-11-23 — Check data
+
+⚠️ Data warnings
+- Division II: Men's poll couldn't be refreshed today — using the saved poll.
+- Not final (D2 men): Central St. (OH) at Simmons (KY) — pre.
+
+Division I
+
+Men's
+No flags.
+
+Women's
+No flags.
+
+Division II
+
+Men's
+- Strong story · Upset — Unranked West Chester beat No. 7 West Liberty, 107-96  https://www.ncaa.com/game/6674581
+    West Chester: unranked
+    West Liberty: No. 7
+    Final: West Chester 107-96 (11-point win)
+    Top scorer, West Chester: Jaysean Williams (17)
+    Top scorer, West Liberty: Jamie Muldowney (27)
+
+Women's
+- Upset — Unranked Ferris St. beat No. 20 Northwood, 75-70  https://www.ncaa.com/game/6660270
+
+Division I — Men: 46 final games checked · Women: 37 · Division II — Men: 26 final games checked · Women: 22
+Polls used: D1: Men AP thru Nov 22 · Women AP thru Nov 22 | D2: Men NABC thru Nov 15 · Women WBCA Nov 17

@@ -2,7 +2,10 @@
   "men": {
     "Oklahoma Baptist": "okla-baptist",
     "Florida Southern": "fla-southern",
-    "Alabama Huntsville": "ala-huntsville"
+    "Alabama Huntsville": "ala-huntsville",
+    "West Alabama": "west-ala",
+    "Eastern New Mexico": "eastern-nm",
+    "West Texas A&M": "west-tex-am"
   },
   "women": {
     "Winston-Salem State": "winston-salem",
@@ -10,7 +13,8 @@
     "Embry-Riddle": "embry-riddle-fl",
     "Central Washington": "central-wash",
     "Western Washington": "western-wash",
-    "Alabama-Huntsville": "ala-huntsville"
+    "Alabama-Huntsville": "ala-huntsville",
+    "West Texas A&M": "west-tex-am"
   },
   "not_same": {
     "men": {
@@ -22,8 +26,14 @@
     }
   },
   "d1": {
-    "men": {},
-    "women": {},
+    "men": {
+      "St. John's": "st-johns-ny",
+      "Southern Cal": "southern-california"
+    },
+    "women": {
+      "St. John's": "st-johns-ny",
+      "Southern Cal": "southern-california"
+    },
     "not_same": {
       "men": {},
       "women": {}

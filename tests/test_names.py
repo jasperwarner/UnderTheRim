@@ -335,13 +335,21 @@ class LoadAliasesTest(unittest.TestCase):
         al = load_aliases(ALIASES)
         self.assertEqual(al["not_same"]["women"]["Grand Valley State"], ["fort-valley-st"])
 
-    def test_real_file_d2_values_unchanged_and_d1_empty(self):
+    def test_real_file_d2_values_unchanged_and_d1_aliases(self):
         al = load_aliases(ALIASES)
         self.assertEqual(al["men"]["Oklahoma Baptist"], "okla-baptist")
         self.assertEqual(al["women"]["Embry-Riddle"], "embry-riddle-fl")
         self.assertEqual(al["not_same"]["men"], {"Nova Southeastern": ["ga-southwestern"]})
-        self.assertEqual(al["d1"], {"men": {}, "women": {},
-                                    "not_same": {"men": {}, "women": {}}})
+        # D2 aliases added after the real-day check (poll spells out the school's name)
+        self.assertEqual(al["men"]["West Alabama"], "west-ala")
+        self.assertEqual(al["men"]["Eastern New Mexico"], "eastern-nm")
+        self.assertEqual(al["men"]["West Texas A&M"], "west-tex-am")
+        self.assertEqual(al["women"]["West Texas A&M"], "west-tex-am")
+        # D1: the AP poll's spelling -> the scoreboard's team
+        for gender in ("men", "women"):
+            self.assertEqual(al["d1"][gender], {"St. John's": "st-johns-ny",
+                                                "Southern Cal": "southern-california"})
+        self.assertEqual(al["d1"]["not_same"], {"men": {}, "women": {}})
 
     def test_d1_section_absent_is_empty(self):
         al = self._load(json.dumps({"men": {"A": "a"}}))
