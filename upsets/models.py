@@ -113,3 +113,9 @@ class Flag:
     game: Game
     headline: str
     tags: list[str] = field(default_factory=list)
+    division: str = "d2"
+    winner_rank: Optional[int] = None
+    loser_rank: Optional[int] = None
+    story_points: int = 0
+    story: str = ""
+    facts: list[str] = field(default_factory=list)

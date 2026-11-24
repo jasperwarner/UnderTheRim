@@ -88,6 +88,26 @@ class FlagGamesTest(unittest.TestCase):
         self.assertEqual([f.game for f in flags], [games[0], games[2]])
 
 
+    def test_non_d1_label_uses_d1_allowlist(self):
+        d1 = {"acc", "big-ten"}
+        game = g("a", 70, "b", 60, home_conf="gsc", away_conf="acc")
+        flags = flag_games([game], {"b": 3}, d1, division="d1")
+        self.assertEqual(flags[0].tags, ["Upset", "Non-D1 opponent"])
+        self.assertEqual(flags[0].division, "d1")
+        game = g("a", 70, "b", 60, home_conf="big-ten", away_conf="acc")
+        flags = flag_games([game], {"b": 3}, d1, division="d1")
+        self.assertEqual(flags[0].tags, ["Upset"])
+
+    def test_division_defaults_to_d2(self):
+        self.assertEqual(flag_games([g("a", 70, "b", 60)], {"b": 3})[0].division, "d2")
+
+    def test_flag_records_ranks(self):
+        flag = flag_games([g("a", 80, "b", 70)], {"a": 18, "b": 4})[0]
+        self.assertEqual((flag.winner_rank, flag.loser_rank), (18, 4))
+        flag = flag_games([g("a", 71, "b", 68)], {"b": 7})[0]
+        self.assertEqual((flag.winner_rank, flag.loser_rank), (None, 7))
+
+
 class BoxscoreCompleteTest(unittest.TestCase):
     def test_complete(self):
         game = g("a", 71, "b", 68)

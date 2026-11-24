@@ -9,10 +9,10 @@ def _label(team: Team, rank: Optional[int]) -> str:
     return f"No. {rank} {team.name}" if rank is not None else team.name
 
 
-def _is_d2(team: Team, d2_conferences: Optional[Collection[str]]) -> bool:
-    if d2_conferences is None:  # no conference list available: old rule
+def _in_division(team: Team, conferences: Optional[Collection[str]]) -> bool:
+    if conferences is None:  # no conference list available: old rule
         return team.conference != ""
-    return team.conference in d2_conferences
+    return team.conference in conferences
 
 
 def close_tag(margin: int) -> str:
@@ -20,7 +20,7 @@ def close_tag(margin: int) -> str:
 
 
 def _flag_game(game: Game, ranks: dict[str, int],
-               d2_conferences: Optional[Collection[str]]) -> Optional[Flag]:
+               conferences: Optional[Collection[str]], division: str) -> Optional[Flag]:
     if not game.is_final:
         return None
     hs, as_ = game.home.score, game.away.score
@@ -45,21 +45,24 @@ def _flag_game(game: Game, ranks: dict[str, int],
         tags.append("Overtime")
     if not tags:
         return None
-    if not _is_d2(game.home, d2_conferences) or not _is_d2(game.away, d2_conferences):
-        tags.append("Non-D2 opponent")
+    if not _in_division(game.home, conferences) or not _in_division(game.away, conferences):
+        tags.append("Non-D1 opponent" if division == "d1" else "Non-D2 opponent")
     headline = f"{w_label} beat {_label(loser, r_l)}, {w_score}-{l_score}"
-    return Flag(game=game, headline=headline, tags=tags)
+    return Flag(game=game, headline=headline, tags=tags, division=division,
+                winner_rank=r_w, loser_rank=r_l)
 
 
 def flag_games(games: list[Game], ranks: dict[str, int],
-               d2_conferences: Optional[Collection[str]] = None) -> list[Flag]:
+               conferences: Optional[Collection[str]] = None,
+               division: str = "d2") -> list[Flag]:
     """Flag notable final games.
 
-    `d2_conferences` is the set of conference seos that count as Division II;
-    a team in any other conference (or none) is a "Non-D2 opponent". When it
-    is None, only a blank conference counts as non-D2.
+    `conferences` is the set of conference seos that count as `division`
+    ("d2" or "d1"); a team in any other conference (or none) is a
+    "Non-D2 opponent" / "Non-D1 opponent". When it is None, only a blank
+    conference counts as outside the division.
     """
-    flags = (_flag_game(game, ranks, d2_conferences) for game in games)
+    flags = (_flag_game(game, ranks, conferences, division) for game in games)
     return [f for f in flags if f is not None]
 
 
