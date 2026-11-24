@@ -13,7 +13,9 @@
     "Alabama-Huntsville": "ala-huntsville"
   },
   "not_same": {
-    "men": {},
+    "men": {
+      "Nova Southeastern": ["ga-southwestern"]
+    },
     "women": {
       "Grand Valley State": ["fort-valley-st"],
       "Colorado Mesa": ["colorado-mines"]
