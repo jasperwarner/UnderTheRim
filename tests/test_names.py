@@ -346,6 +346,8 @@ class LoadAliasesTest(unittest.TestCase):
         self.assertEqual(al["men"]["Eastern New Mexico"], "eastern-nm")
         self.assertEqual(al["men"]["West Texas A&M"], "west-tex-am")
         self.assertEqual(al["women"]["West Texas A&M"], "west-tex-am")
+        self.assertEqual(al["women"]["Cal State L.A."], "cal-st-la")
+        self.assertEqual(al["men"]["Cal State L.A."], "cal-st-la")
         # D1: the AP poll's spelling -> the scoreboard's team
         # Per-key checks only: the owner adds D1 aliases to the real file over time, so
         # this must keep passing when entries are added.

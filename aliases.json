@@ -7,7 +7,8 @@
     "Eastern New Mexico": "eastern-nm",
     "West Texas A&M": "west-tex-am",
     "Gannon, Pa.": "gannon",
-    "Cal State San Bernardino": "cal-st-san-bdino"
+    "Cal State San Bernardino": "cal-st-san-bdino",
+    "Cal State L.A.": "cal-st-la"
   },
   "women": {
     "Winston-Salem State": "winston-salem",
@@ -16,7 +17,8 @@
     "Central Washington": "central-wash",
     "Western Washington": "western-wash",
     "Alabama-Huntsville": "ala-huntsville",
-    "West Texas A&M": "west-tex-am"
+    "West Texas A&M": "west-tex-am",
+    "Cal State L.A.": "cal-st-la"
   },
   "not_same": {
     "men": {
