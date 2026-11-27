@@ -1,0 +1,943 @@
+{
+  "day": "2026-11-26",
+  "status": "Check data",
+  "flag_count": 6,
+  "polls_used": "D1: Men AP thru Nov 22 · Women AP thru Nov 22 | D2: Men NABC thru Nov 22 · Women WBCA Nov 24",
+  "warnings": [
+    "Division II: Women's poll couldn't be refreshed today — using the saved poll.",
+    "Not final (D2 women): Augustana (SD) at P.R.-Mayaguez — pre."
+  ],
+  "final_counts": {
+    "d1": {
+      "men": 24,
+      "women": 18
+    },
+    "d2": {
+      "men": 1,
+      "women": 0
+    }
+  },
+  "fatal": false,
+  "unchecked": [],
+  "flags": [
+    {
+      "division": "d1",
+      "gender": "men",
+      "game_id": "6652579",
+      "headline": "Unranked Utah St. beat No. 18 Southern California, 78-74",
+      "tags": [
+        "Upset"
+      ],
+      "link": "https://www.ncaa.com/game/6652579",
+      "home": {
+        "seo": "utah-st",
+        "score": 78
+      },
+      "away": {
+        "seo": "southern-california",
+        "score": 74
+      },
+      "winner_rank": null,
+      "loser_rank": 18,
+      "story": "Strong story",
+      "story_points": 4,
+      "facts": [
+        "Utah St.: unranked",
+        "Southern California: No. 18, 6-0",
+        "Final: Utah St. 78-74 (4-point win)",
+        "Top scorer, Utah St.: Mason Falslev (27)",
+        "Top scorer, Southern California: Alijah Arenas (33)"
+      ]
+    },
+    {
+      "division": "d1",
+      "gender": "men",
+      "game_id": "6654414",
+      "headline": "No. 11 Michigan St. beat Arkansas, 70-67",
+      "tags": [
+        "Close (3 pts)"
+      ],
+      "link": "https://www.ncaa.com/game/6654414",
+      "home": {
+        "seo": "michigan-st",
+        "score": 70
+      },
+      "away": {
+        "seo": "arkansas",
+        "score": 67
+      },
+      "winner_rank": 11,
+      "loser_rank": null,
+      "story": "",
+      "story_points": 2,
+      "facts": []
+    },
+    {
+      "division": "d1",
+      "gender": "men",
+      "game_id": "6653467",
+      "headline": "Unranked Saint Mary's (CA) beat No. 6 UCLA, 85-70",
+      "tags": [
+        "Upset"
+      ],
+      "link": "https://www.ncaa.com/game/6653467",
+      "home": {
+        "seo": "st-marys-ca",
+        "score": 85
+      },
+      "away": {
+        "seo": "ucla",
+        "score": 70
+      },
+      "winner_rank": null,
+      "loser_rank": 6,
+      "story": "Strong story",
+      "story_points": 5,
+      "facts": [
+        "Saint Mary's (CA): unranked",
+        "UCLA: No. 6, 6-0",
+        "Final: Saint Mary's (CA) 85-70 (15-point win)",
+        "Top scorer, Saint Mary's (CA): Jeremy Dent-Smith (21)",
+        "Top scorer, UCLA: Jaylen Petty (15)"
+      ]
+    },
+    {
+      "division": "d1",
+      "gender": "men",
+      "game_id": "6651149",
+      "headline": "No. 20 LSU beat SMU, 95-86",
+      "tags": [
+        "Overtime"
+      ],
+      "link": "https://www.ncaa.com/game/6651149",
+      "home": {
+        "seo": "smu",
+        "score": 86
+      },
+      "away": {
+        "seo": "lsu",
+        "score": 95
+      },
+      "winner_rank": 20,
+      "loser_rank": null,
+      "story": "",
+      "story_points": 2,
+      "facts": []
+    },
+    {
+      "division": "d1",
+      "gender": "men",
+      "game_id": "6664125",
+      "headline": "No. 25 Louisville beat No. 13 St. John's (NY), 93-90",
+      "tags": [
+        "Big rank gap",
+        "Close (3 pts)"
+      ],
+      "link": "https://www.ncaa.com/game/6664125",
+      "home": {
+        "seo": "st-johns-ny",
+        "score": 90
+      },
+      "away": {
+        "seo": "louisville",
+        "score": 93
+      },
+      "winner_rank": 25,
+      "loser_rank": 13,
+      "story": "Strong story",
+      "story_points": 4,
+      "facts": [
+        "Louisville: No. 25, 3-1",
+        "St. John's (NY): No. 13, 5-0",
+        "Final: Louisville 93-90 (3-point win)",
+        "Top scorer, Louisville: Seth Trimble (33)",
+        "Top scorer, St. John's (NY): Ian Jackson (18)"
+      ]
+    },
+    {
+      "division": "d1",
+      "gender": "men",
+      "game_id": "6664126",
+      "headline": "No. 5 Texas Tech beat Oregon, 62-59",
+      "tags": [
+        "Close (3 pts)"
+      ],
+      "link": "https://www.ncaa.com/game/6664126",
+      "home": {
+        "seo": "oregon",
+        "score": 59
+      },
+      "away": {
+        "seo": "texas-tech",
+        "score": 62
+      },
+      "winner_rank": 5,
+      "loser_rank": null,
+      "story": "",
+      "story_points": 2,
+      "facts": []
+    }
+  ],
+  "games": {
+    "d1": {
+      "men": [
+        {
+          "id": "6654919",
+          "gameState": "final",
+          "currentPeriod": "FINAL - OT",
+          "home": {
+            "seo": "hawaii",
+            "name": "Hawaii",
+            "score": 83,
+            "conferenceSeo": "mountain-west"
+          },
+          "away": {
+            "seo": "uiw",
+            "name": "UIW",
+            "score": 81,
+            "conferenceSeo": "southland"
+          }
+        },
+        {
+          "id": "6678362",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "saint-louis",
+            "name": "Saint Louis",
+            "score": 66,
+            "conferenceSeo": "atlantic-10"
+          },
+          "away": {
+            "seo": "stanford",
+            "name": "Stanford",
+            "score": 64,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6667295",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "colorado-st",
+            "name": "Colorado St.",
+            "score": 77,
+            "conferenceSeo": "pac-12"
+          },
+          "away": {
+            "seo": "clemson",
+            "name": "Clemson",
+            "score": 75,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6655249",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "cincinnati",
+            "name": "Cincinnati",
+            "score": 83,
+            "conferenceSeo": "big-12"
+          },
+          "away": {
+            "seo": "georgia",
+            "name": "Georgia",
+            "score": 81,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6649661",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "utsa",
+            "name": "UTSA",
+            "score": 61,
+            "conferenceSeo": "american"
+          },
+          "away": {
+            "seo": "army",
+            "name": "Army West Point",
+            "score": 79,
+            "conferenceSeo": "patriot"
+          }
+        },
+        {
+          "id": "6652931",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "purdue",
+            "name": "Purdue",
+            "score": 63,
+            "conferenceSeo": "big-ten"
+          },
+          "away": {
+            "seo": "oklahoma",
+            "name": "Oklahoma",
+            "score": 70,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6655996",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "ucf",
+            "name": "UCF",
+            "score": 73,
+            "conferenceSeo": "big-12"
+          },
+          "away": {
+            "seo": "boston-college",
+            "name": "Boston College",
+            "score": 75,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6653212",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "south-carolina",
+            "name": "South Carolina",
+            "score": 80,
+            "conferenceSeo": "sec"
+          },
+          "away": {
+            "seo": "arizona-st",
+            "name": "Arizona St.",
+            "score": 73,
+            "conferenceSeo": "big-12"
+          }
+        },
+        {
+          "id": "6650931",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "texas",
+            "name": "Texas",
+            "score": 92,
+            "conferenceSeo": "sec"
+          },
+          "away": {
+            "seo": "georgetown",
+            "name": "Georgetown",
+            "score": 83,
+            "conferenceSeo": "big-east"
+          }
+        },
+        {
+          "id": "6664115",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "michigan",
+            "name": "Michigan",
+            "score": 70,
+            "conferenceSeo": "big-ten"
+          },
+          "away": {
+            "seo": "miami-fl",
+            "name": "Miami (FL)",
+            "score": 97,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6664123",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "san-diego-st",
+            "name": "San Diego St.",
+            "score": 75,
+            "conferenceSeo": "pac-12"
+          },
+          "away": {
+            "seo": "maryland",
+            "name": "Maryland",
+            "score": 71,
+            "conferenceSeo": "big-ten"
+          }
+        },
+        {
+          "id": "6652579",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "utah-st",
+            "name": "Utah St.",
+            "score": 78,
+            "conferenceSeo": "pac-12"
+          },
+          "away": {
+            "seo": "southern-california",
+            "name": "Southern California",
+            "score": 74,
+            "conferenceSeo": "big-ten"
+          }
+        },
+        {
+          "id": "6654414",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "michigan-st",
+            "name": "Michigan St.",
+            "score": 70,
+            "conferenceSeo": "big-ten"
+          },
+          "away": {
+            "seo": "arkansas",
+            "name": "Arkansas",
+            "score": 67,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6653467",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "st-marys-ca",
+            "name": "Saint Mary's (CA)",
+            "score": 85,
+            "conferenceSeo": "wcc"
+          },
+          "away": {
+            "seo": "ucla",
+            "name": "UCLA",
+            "score": 70,
+            "conferenceSeo": "big-ten"
+          }
+        },
+        {
+          "id": "6664124",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "iowa-st",
+            "name": "Iowa St.",
+            "score": 64,
+            "conferenceSeo": "big-12"
+          },
+          "away": {
+            "seo": "tennessee",
+            "name": "Tennessee",
+            "score": 75,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6664116",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "creighton",
+            "name": "Creighton",
+            "score": 95,
+            "conferenceSeo": "big-east"
+          },
+          "away": {
+            "seo": "tcu",
+            "name": "TCU",
+            "score": 87,
+            "conferenceSeo": "big-12"
+          }
+        },
+        {
+          "id": "6651149",
+          "gameState": "final",
+          "currentPeriod": "FINAL - OT",
+          "home": {
+            "seo": "smu",
+            "name": "SMU",
+            "score": 86,
+            "conferenceSeo": "acc"
+          },
+          "away": {
+            "seo": "lsu",
+            "name": "LSU",
+            "score": 95,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6653660",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "pittsburgh",
+            "name": "Pittsburgh",
+            "score": 71,
+            "conferenceSeo": "acc"
+          },
+          "away": {
+            "seo": "depaul",
+            "name": "DePaul",
+            "score": 64,
+            "conferenceSeo": "big-east"
+          }
+        },
+        {
+          "id": "6653799",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "jacksonville-st",
+            "name": "Jacksonville St.",
+            "score": 63,
+            "conferenceSeo": "cusa"
+          },
+          "away": {
+            "seo": "uc-davis",
+            "name": "UC Davis",
+            "score": 68,
+            "conferenceSeo": "mountain-west"
+          }
+        },
+        {
+          "id": "6664117",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "kansas-st",
+            "name": "Kansas St.",
+            "score": 91,
+            "conferenceSeo": "big-12"
+          },
+          "away": {
+            "seo": "alabama",
+            "name": "Alabama",
+            "score": 104,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6664125",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "st-johns-ny",
+            "name": "St. John's (NY)",
+            "score": 90,
+            "conferenceSeo": "big-east"
+          },
+          "away": {
+            "seo": "louisville",
+            "name": "Louisville",
+            "score": 93,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6660571",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "neb-omaha",
+            "name": "Omaha",
+            "score": 62,
+            "conferenceSeo": "summit-league"
+          },
+          "away": {
+            "seo": "pacific",
+            "name": "Pacific",
+            "score": 71,
+            "conferenceSeo": "wcc"
+          }
+        },
+        {
+          "id": "6664118",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "gonzaga",
+            "name": "Gonzaga",
+            "score": 72,
+            "conferenceSeo": "pac-12"
+          },
+          "away": {
+            "seo": "baylor",
+            "name": "Baylor",
+            "score": 64,
+            "conferenceSeo": "big-12"
+          }
+        },
+        {
+          "id": "6664126",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "oregon",
+            "name": "Oregon",
+            "score": 59,
+            "conferenceSeo": "big-ten"
+          },
+          "away": {
+            "seo": "texas-tech",
+            "name": "Texas Tech",
+            "score": 62,
+            "conferenceSeo": "big-12"
+          }
+        }
+      ],
+      "women": [
+        {
+          "id": "6646486",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "southern-u",
+            "name": "Southern U.",
+            "score": 52,
+            "conferenceSeo": "swac"
+          },
+          "away": {
+            "seo": "auburn",
+            "name": "Auburn",
+            "score": 54,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6647151",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "robert-morris",
+            "name": "Robert Morris",
+            "score": 43,
+            "conferenceSeo": "horizon"
+          },
+          "away": {
+            "seo": "clemson",
+            "name": "Clemson",
+            "score": 66,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6648135",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "umes",
+            "name": "UMES",
+            "score": 50,
+            "conferenceSeo": "meac"
+          },
+          "away": {
+            "seo": "oregon",
+            "name": "Oregon",
+            "score": 74,
+            "conferenceSeo": "big-ten"
+          }
+        },
+        {
+          "id": "6648661",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "wisconsin",
+            "name": "Wisconsin",
+            "score": 62,
+            "conferenceSeo": "big-ten"
+          },
+          "away": {
+            "seo": "syracuse",
+            "name": "Syracuse",
+            "score": 75,
+            "conferenceSeo": "acc"
+          }
+        },
+        {
+          "id": "6651491",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "notre-dame",
+            "name": "Notre Dame",
+            "score": 78,
+            "conferenceSeo": "acc"
+          },
+          "away": {
+            "seo": "west-virginia",
+            "name": "West Virginia",
+            "score": 64,
+            "conferenceSeo": "big-12"
+          }
+        },
+        {
+          "id": "6651985",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "howard",
+            "name": "Howard",
+            "score": 64,
+            "conferenceSeo": "meac"
+          },
+          "away": {
+            "seo": "texas-southern",
+            "name": "Texas Southern",
+            "score": 51,
+            "conferenceSeo": "swac"
+          }
+        },
+        {
+          "id": "6647138",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "ualr",
+            "name": "Little Rock",
+            "score": 53,
+            "conferenceSeo": "uac-"
+          },
+          "away": {
+            "seo": "tennessee-tech",
+            "name": "Tennessee Tech",
+            "score": 50,
+            "conferenceSeo": "socon"
+          }
+        },
+        {
+          "id": "6646050",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "col-of-charleston",
+            "name": "Col. of Charleston",
+            "score": 68,
+            "conferenceSeo": "caa"
+          },
+          "away": {
+            "seo": "mcneese",
+            "name": "McNeese",
+            "score": 61,
+            "conferenceSeo": "southland"
+          }
+        },
+        {
+          "id": "6647782",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "colorado",
+            "name": "Colorado",
+            "score": 61,
+            "conferenceSeo": "big-12"
+          },
+          "away": {
+            "seo": "georgia",
+            "name": "Georgia",
+            "score": 52,
+            "conferenceSeo": "sec"
+          }
+        },
+        {
+          "id": "6647168",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "florida",
+            "name": "Florida",
+            "score": 65,
+            "conferenceSeo": "sec"
+          },
+          "away": {
+            "seo": "davidson",
+            "name": "Davidson",
+            "score": 56,
+            "conferenceSeo": "atlantic-10"
+          }
+        },
+        {
+          "id": "6651987",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "binghamton",
+            "name": "Binghamton",
+            "score": 75,
+            "conferenceSeo": "america-east"
+          },
+          "away": {
+            "seo": "utsa",
+            "name": "UTSA",
+            "score": 67,
+            "conferenceSeo": "american"
+          }
+        },
+        {
+          "id": "6665473",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "grambling",
+            "name": "Grambling",
+            "score": 63,
+            "conferenceSeo": "swac"
+          },
+          "away": {
+            "seo": "colorado-st",
+            "name": "Colorado St.",
+            "score": 71,
+            "conferenceSeo": "pac-12"
+          }
+        },
+        {
+          "id": "6648970",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "fairfield",
+            "name": "Fairfield",
+            "score": 52,
+            "conferenceSeo": "metro"
+          },
+          "away": {
+            "seo": "north-dakota-st",
+            "name": "North Dakota St.",
+            "score": 27,
+            "conferenceSeo": "summit-league"
+          }
+        },
+        {
+          "id": "6647853",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "washington-st",
+            "name": "Washington St.",
+            "score": 58,
+            "conferenceSeo": "pac-12"
+          },
+          "away": {
+            "seo": "kansas",
+            "name": "Kansas",
+            "score": 69,
+            "conferenceSeo": "big-12"
+          }
+        },
+        {
+          "id": "6646257",
+          "gameState": "final",
+          "currentPeriod": "FINAL - OT",
+          "home": {
+            "seo": "texas-tech",
+            "name": "Texas Tech",
+            "score": 66,
+            "conferenceSeo": "big-12"
+          },
+          "away": {
+            "seo": "air-force",
+            "name": "Air Force",
+            "score": 60,
+            "conferenceSeo": "mountain-west"
+          }
+        },
+        {
+          "id": "6650119",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "missouri-st",
+            "name": "Missouri St.",
+            "score": 54,
+            "conferenceSeo": "cusa"
+          },
+          "away": {
+            "seo": "minnesota",
+            "name": "Minnesota",
+            "score": 89,
+            "conferenceSeo": "big-ten"
+          }
+        },
+        {
+          "id": "6648282",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "santa-clara",
+            "name": "Santa Clara",
+            "score": 89,
+            "conferenceSeo": "wcc"
+          },
+          "away": {
+            "seo": "xavier",
+            "name": "Xavier",
+            "score": 80,
+            "conferenceSeo": "big-east"
+          }
+        },
+        {
+          "id": "6649989",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "miami-oh",
+            "name": "Miami (OH)",
+            "score": 70,
+            "conferenceSeo": "mac"
+          },
+          "away": {
+            "seo": "cincinnati",
+            "name": "Cincinnati",
+            "score": 56,
+            "conferenceSeo": "big-12"
+          }
+        }
+      ]
+    },
+    "d2": {
+      "men": [
+        {
+          "id": "6667400",
+          "gameState": "final",
+          "currentPeriod": "FINAL",
+          "home": {
+            "seo": "simon-fraser",
+            "name": "Simon Fraser",
+            "score": 71,
+            "conferenceSeo": "great-northwest"
+          },
+          "away": {
+            "seo": "black-hills-st",
+            "name": "Black Hills St.",
+            "score": 92,
+            "conferenceSeo": "rmac"
+          }
+        }
+      ],
+      "women": [
+        {
+          "id": "6657405",
+          "gameState": "pre",
+          "currentPeriod": "",
+          "home": {
+            "seo": "pr-mayaguez",
+            "name": "P.R.-Mayaguez",
+            "score": null,
+            "conferenceSeo": "dii-independent"
+          },
+          "away": {
+            "seo": "augustana-sd",
+            "name": "Augustana (SD)",
+            "score": null,
+            "conferenceSeo": "nsic"
+          }
+        }
+      ]
+    }
+  }
+}
