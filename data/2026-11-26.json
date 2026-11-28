@@ -4,6 +4,7 @@
   "flag_count": 6,
   "polls_used": "D1: Men AP thru Nov 22 · Women AP thru Nov 22 | D2: Men NABC thru Nov 22 · Women WBCA Nov 24",
   "warnings": [
+    "Division II: Women's poll couldn't be refreshed today — using the saved poll.",
     "Not final (D2 women): Augustana (SD) at P.R.-Mayaguez — pre."
   ],
   "final_counts": {
